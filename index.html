@@ -149,7 +149,9 @@
   }
   .set-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
   .set-input::placeholder { color: #444; font-weight: 400; }
-  .set-input.logged { border-color: rgba(52, 211, 153, 0.4); background: var(--green-glow); }
+  .set-input.predicted { color: #555; }
+  .set-input.predicted:focus { color: var(--text); }
+  .set-input.logged { border-color: rgba(52, 211, 153, 0.4); background: var(--green-glow); color: var(--text); }
   .set-check {
     width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border);
     background: transparent; cursor: pointer; display: flex; align-items: center;
@@ -586,10 +588,13 @@ function renderExercises() {
       lastSection = ex.section;
     }
 
+    // Extract predicted weight number if available
+    const predWeight = ex.prediction ? ex.prediction.match(/^(\d+)/)?.[1] || '' : '';
+
     const setsHTML = Array.from({length: ex.sets}, (_, si) => `
       <div class="set-row" data-ex="${ei}" data-set="${si}">
         <div class="set-label">${si + 1}</div>
-        <input class="set-input" type="text" inputmode="decimal" placeholder="lbs" data-field="weight" data-ex="${ei}" data-set="${si}">
+        <input class="set-input${predWeight ? ' predicted' : ''}" type="text" inputmode="decimal" placeholder="lbs" data-field="weight" data-ex="${ei}" data-set="${si}" ${predWeight ? `value="${predWeight}"` : ''}>
         <input class="set-input" type="text" inputmode="numeric" placeholder="reps" data-field="reps" data-ex="${ei}" data-set="${si}">
         <button class="set-check" onclick="logSet(${ei}, ${si}, this)" data-ex="${ei}" data-set="${si}">&#10003;</button>
       </div>
@@ -603,7 +608,6 @@ function renderExercises() {
           <div class="exercise-meta">${ex.sets}x${ex.reps} / ${ex.rest}s</div>
         </div>
         <div class="exercise-note">${ex.note}</div>
-        ${ex.prediction ? `<div class="prediction">Predicted: ${ex.prediction}</div>` : ''}
         <div class="sets-grid">
           <div class="set-row header">
             <span>Set</span><span>Weight</span><span>Reps</span><span></span>
@@ -920,6 +924,13 @@ promptInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     sendMessage();
+  }
+});
+
+// Remove predicted styling on edit
+document.addEventListener('input', (e) => {
+  if (e.target.classList.contains('predicted')) {
+    e.target.classList.remove('predicted');
   }
 });
 
