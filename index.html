@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pull B — Friday 3/20</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #141414;
+    --surface-2: #1e1e1e;
+    --surface-3: #252525;
+    --border: #2a2a2a;
+    --border-light: #333;
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --text-muted: #555;
+    --accent: #4a9eff;
+    --accent-glow: rgba(74, 158, 255, 0.15);
+    --accent-border: rgba(74, 158, 255, 0.3);
+    --green: #34d399;
+    --green-glow: rgba(52, 211, 153, 0.15);
+    --amber: #fbbf24;
+    --tess: #c084fc;
+    --tess-glow: rgba(192, 132, 252, 0.12);
+    --tess-border: rgba(192, 132, 252, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    padding: 0 0 160px 0;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Header ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  header .subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .phase-badge {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--accent); background: var(--accent-glow);
+    padding: 3px 8px; border-radius: 4px; margin-top: 6px;
+  }
+
+  /* ── Timer ── */
+  .timer-bar {
+    position: sticky; top: 76px; z-index: 99;
+    background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px; display: none; align-items: center; gap: 12px;
+  }
+  .timer-bar.active { display: flex; }
+  .timer-display { font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 70px; }
+  .timer-label { font-size: 13px; color: var(--text-dim); flex: 1; }
+  .timer-btn {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text); font-size: 13px; font-weight: 600;
+    padding: 6px 14px; border-radius: 8px; cursor: pointer;
+  }
+
+  /* ── Section Divider ── */
+  .section-divider {
+    margin: 20px 16px 4px; padding: 10px 16px;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 10px; display: flex; align-items: center; gap: 10px;
+  }
+  .section-divider .label {
+    font-size: 12px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--amber);
+  }
+  .section-divider .desc { font-size: 12px; color: var(--text-dim); }
+
+  /* ── Exercise Cards ── */
+  .exercise-card {
+    margin: 12px 16px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 14px;
+    overflow: hidden; transition: border-color 0.2s;
+  }
+  .exercise-card.complete { border-color: rgba(52, 211, 153, 0.3); }
+  .exercise-card.active-exercise { border-color: var(--accent-border); }
+  .exercise-header {
+    padding: 14px 16px; display: flex; align-items: center;
+    gap: 12px; border-bottom: 1px solid var(--border);
+  }
+  .exercise-num {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--surface-2); display: flex; align-items: center;
+    justify-content: center; font-size: 13px; font-weight: 700;
+    color: var(--text-dim); flex-shrink: 0;
+  }
+  .exercise-card.complete .exercise-num { background: var(--green-glow); color: var(--green); }
+  .exercise-card.active-exercise .exercise-num { background: var(--accent-glow); color: var(--accent); }
+  .exercise-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .exercise-meta { font-size: 12px; color: var(--text-dim); }
+  .exercise-note {
+    padding: 8px 16px; font-size: 12px; color: var(--text-dim);
+    background: var(--surface-2); border-bottom: 1px solid var(--border); line-height: 1.4;
+  }
+  .prediction { font-size: 11px; color: var(--accent); text-align: center; padding: 4px 0 2px; }
+
+  /* ── Sets Grid ── */
+  .sets-grid { padding: 8px 12px 12px; }
+  .set-row {
+    display: grid; grid-template-columns: 36px 1fr 1fr 44px;
+    gap: 8px; align-items: center; padding: 6px 0;
+  }
+  .set-row.header { padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .set-row.header span {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-dim);
+  }
+  .set-label { font-size: 13px; font-weight: 600; color: var(--text-dim); text-align: center; }
+  .set-input {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 15px; font-weight: 500;
+    padding: 10px 12px; width: 100%; text-align: center;
+    font-variant-numeric: tabular-nums; transition: border-color 0.2s; -webkit-appearance: none;
+  }
+  .set-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .set-input::placeholder { color: #444; font-weight: 400; }
+  .set-input.logged { border-color: rgba(52, 211, 153, 0.4); background: var(--green-glow); }
+  .set-check {
+    width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border);
+    background: transparent; cursor: pointer; display: flex; align-items: center;
+    justify-content: center; transition: all 0.2s; color: transparent; font-size: 16px;
+  }
+  .set-check.done { background: var(--green); border-color: var(--green); color: #000; }
+
+  /* ── RPE Picker ── */
+  .rpe-row {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 0 2px;
+    animation: msgIn 0.2s ease;
+  }
+  .rpe-label {
+    font-size: 11px; font-weight: 600; color: var(--tess);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    white-space: nowrap; margin-right: 2px;
+  }
+  .rpe-pills {
+    display: flex; gap: 4px; flex: 1;
+  }
+  .rpe-pill {
+    flex: 1; height: 34px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-2);
+    color: var(--text-dim); font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rpe-pill:active { transform: scale(0.94); }
+  .rpe-pill.selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
+  .rpe-pill[data-rpe="6"] { }
+  .rpe-pill[data-rpe="7"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+  .rpe-pill[data-rpe="8"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+  .rpe-pill[data-rpe="9"].selected { border-color: var(--amber); color: var(--amber); background: rgba(251, 191, 36, 0.12); }
+  .rpe-pill[data-rpe="10"].selected { border-color: #f87171; color: #f87171; background: rgba(248, 113, 113, 0.12); }
+  .rpe-hint {
+    font-size: 10px; color: var(--text-muted); text-align: center;
+    padding: 0 0 4px; grid-column: 1 / -1;
+  }
+
+  /* ── Bottom Dock ── */
+  .bottom-dock {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10, 10, 10, 0.96);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border-top: 1px solid var(--border);
+    transition: height 0.3s ease;
+  }
+
+  /* ── Progress Strip ── */
+  .progress-strip {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 20px; border-bottom: 1px solid var(--border);
+  }
+  .progress-left { display: flex; align-items: center; gap: 12px; }
+  .progress-bar-track {
+    width: 80px; height: 4px; background: var(--surface-2);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--green); border-radius: 2px;
+    transition: width 0.4s ease; width: 0%;
+  }
+  .progress-text { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .progress-pct { font-size: 12px; color: var(--text-dim); }
+  .copy-btn {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text); font-size: 12px; font-weight: 600;
+    padding: 6px 14px; border-radius: 8px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .copy-btn:active { background: var(--surface-3); }
+
+  /* ── Chat Panel ── */
+  .chat-panel {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+    opacity: 0;
+  }
+  .chat-panel.open { max-height: 50vh; opacity: 1; overflow-y: auto; }
+  .chat-messages { padding: 12px 20px 4px; display: flex; flex-direction: column; gap: 10px; }
+
+  .chat-msg {
+    max-width: 85%; padding: 10px 14px; border-radius: 14px;
+    font-size: 14px; line-height: 1.45; animation: msgIn 0.25s ease;
+  }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .chat-msg.user {
+    align-self: flex-end; background: var(--accent);
+    color: #000; border-bottom-right-radius: 4px;
+  }
+  .chat-msg.tess {
+    align-self: flex-start; background: var(--tess-glow);
+    border: 1px solid var(--tess-border); color: var(--text);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-msg.tess .tess-name {
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--tess); margin-bottom: 4px;
+  }
+  .chat-msg.system {
+    align-self: center; background: var(--surface-2);
+    color: var(--text-dim); font-size: 12px; border-radius: 8px;
+    padding: 6px 12px; max-width: 95%;
+  }
+
+  /* ── Prompt Box (Lovable-style) ── */
+  .prompt-area { padding: 10px 16px 14px; }
+  .prompt-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 4px 4px 4px 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+  .prompt-box::before {
+    content: ''; position: absolute; inset: -1px; border-radius: 15px;
+    background: linear-gradient(135deg, var(--tess-border), transparent 40%, var(--accent-border));
+    z-index: -1; opacity: 0; transition: opacity 0.3s;
+  }
+  .prompt-box:focus-within { border-color: var(--tess-border); }
+  .prompt-box:focus-within::before { opacity: 1; }
+
+  .prompt-input {
+    flex: 1; background: transparent; border: none; color: var(--text);
+    font-size: 15px; font-family: inherit; outline: none;
+    padding: 10px 0; min-height: 20px;
+  }
+  .prompt-input::placeholder { color: var(--text-muted); }
+
+  .prompt-send {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--tess); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0; opacity: 0.4;
+  }
+  .prompt-send.ready { opacity: 1; }
+  .prompt-send:active { transform: scale(0.92); }
+  .prompt-send svg { width: 18px; height: 18px; }
+
+  /* ── Toast ── */
+  .copy-toast {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: var(--green); color: #000;
+    font-size: 15px; font-weight: 700; padding: 14px 28px;
+    border-radius: 12px; opacity: 0; transition: all 0.3s;
+    z-index: 200; pointer-events: none;
+  }
+  .copy-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Pull B: Vertical Emphasis</h1>
+  <div class="subtitle">Friday, March 20 — Week 1</div>
+  <div class="phase-badge">Accumulation: RPE 7-8, 10-15 reps</div>
+</header>
+
+<div class="timer-bar" id="timerBar">
+  <div class="timer-display" id="timerDisplay">0:00</div>
+  <div class="timer-label" id="timerLabel">Rest</div>
+  <button class="timer-btn" onclick="resetTimer()">Skip</button>
+</div>
+
+<div id="exercises"></div>
+
+<!-- Bottom Dock -->
+<div class="bottom-dock" id="bottomDock">
+  <div class="progress-strip">
+    <div class="progress-left">
+      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+      <span class="progress-text" id="progressText">0 / 32</span>
+      <span class="progress-pct" id="progressPct"></span>
+    </div>
+    <button class="copy-btn" onclick="copyLog()">Copy Log</button>
+  </div>
+
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-messages" id="chatMessages"></div>
+  </div>
+
+  <div class="prompt-area">
+    <div class="prompt-box" id="promptBox">
+      <input class="prompt-input" id="promptInput" type="text"
+        placeholder="Talk to Tess about your session..."
+        autocomplete="off" autocorrect="on">
+      <button class="prompt-send" id="promptSend" onclick="sendMessage()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="toast">Copied to clipboard</div>
+
+<script>
+// ── Exercise Data ──
+const PULL_B = [
+  { name: "Wide-Grip Lat Pulldown", sets: 4, reps: "10-12", rest: 90,
+    note: "Lead with the vertical pull. Full stretch at top, drive elbows down.",
+    prediction: "120 lb (from Pull A)", section: "pull",
+    cues: ["Think about pulling your elbows into your back pockets.", "Lean back just slightly -- not a full row.", "Full stretch at the top. Let the lats lengthen before you pull again.", "Drive elbows down and back. Hands are hooks."] },
+  { name: "Single-Arm Cable Row", sets: 3, reps: "12-15/side", rest: 60,
+    note: "Rotate slightly at peak for full lat engagement. Hip-height cable.",
+    prediction: null, section: "pull",
+    cues: ["Small rotation at peak contraction -- let the lat fully shorten.", "Hip-height cable. Pull to your hip, not your chest.", "Control the eccentric. Feel the stretch across your back."] },
+  { name: "Chest-Supported DB Row", sets: 3, reps: "10-12", rest: 75,
+    note: "Lower volume than Pull A. Focus on squeeze and stretch. Sciatica-friendly.",
+    prediction: "140 lb (from Pull A)", section: "pull",
+    cues: ["Full stretch at the bottom -- let the DBs hang.", "Drive elbows back, squeeze shoulder blades together at top.", "Chest stays on the pad. Zero momentum."] },
+  { name: "Face Pull (rope, high pulley)", sets: 4, reps: "15-20", rest: 45,
+    note: "External rotation throughout. Non-negotiable for shoulder longevity.",
+    prediction: null, section: "pull",
+    cues: ["External rotation the whole time -- thumbs back, pinkies forward.", "This is shoulder insurance. Every rep counts.", "Pull to your face, not your chest. Elbows high.", "Light weight, perfect form. This is not a strength exercise."] },
+  { name: "Incline DB Curl (45-degree)", sets: 3, reps: "10-12", rest: 60,
+    note: "Lengthened bicep position. Full hang at bottom, zero momentum. Go lighter than expected.",
+    prediction: null, section: "pull",
+    cues: ["Let your arms hang completely at the bottom. Feel that stretch.", "Zero momentum. If you're swinging, drop the weight.", "The stretch at the bottom IS the stimulus. Don't cheat it."] },
+  { name: "EZ Bar Curl", sets: 3, reps: "10-12", rest: 60,
+    note: "Heavier curl variation. Strict form, no swing.",
+    prediction: null, section: "pull",
+    cues: ["Elbows pinned to your sides. Only forearms move.", "Squeeze at the top for a full second.", "Strict form. If the weight is too heavy to control, drop it."] }
+];
+
+const PUSH_B_FINISH = [
+  { name: "Seated DB Overhead Press (neutral grip)", sets: 3, reps: "10-12", rest: 90,
+    note: "Shoulder-friendly pressing. Controlled eccentric. Picking up from yesterday.",
+    prediction: "60 lb (from 3/13)", section: "push",
+    cues: ["Neutral grip protects your shoulders. Keep those palms facing each other.", "Controlled eccentric -- 2 seconds down.", "Full lockout at the top. Press through the ceiling."] },
+  { name: "Behind-Body Cable Lateral Raise", sets: 3, reps: "15-20", rest: 45,
+    note: "Humiston technique. Cable runs behind body, isolates medial delt. No swing.",
+    prediction: null, section: "push",
+    cues: ["Cable behind your body. Slight lean forward.", "Raise to shoulder height -- no higher. Control it.", "No swinging. If you can't control it, drop the weight."] },
+  { name: "Cable Overhead Tricep Extension (rope)", sets: 3, reps: "12-15", rest: 60,
+    note: "Lengthened position for long head. Squeeze at full extension.",
+    prediction: null, section: "push",
+    cues: ["Elbows stay pointed at the ceiling.", "Full extension. Squeeze the tricep at the bottom.", "The stretch at the top is where the long head grows."] },
+  { name: "Dip Machine or Close-Grip Pushdown", sets: 3, reps: "10-12", rest: 60,
+    note: "Second tricep movement. Different stimulus from overhead extension.",
+    prediction: null, section: "push",
+    cues: ["Full lockout at the bottom of each rep.", "Elbows pinned. This is a tricep exercise, not a chest exercise.", "Control the negative. Time under tension matters here."] }
+];
+
+const EXERCISES = [...PULL_B, ...PUSH_B_FINISH];
+const TOTAL_SETS = EXERCISES.reduce((s, e) => s + e.sets, 0);
+
+// ── Periodization ──
+const CURRENT_WEEK = 1;
+const PHASE_TARGETS = {
+  1: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
+  2: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
+  3: { rpe: [8, 9], rir: [2, 1], label: "Intensification", desc: "1-2 reps left in the tank" },
+  4: { rpe: [8, 9], rir: [2, 1], label: "Intensification", desc: "1-2 reps left in the tank" },
+  5: { rpe: [9, 9], rir: [1, 0], label: "Realization", desc: "0-1 reps left in the tank" },
+  6: { rpe: [5, 6], rir: [5, 4], label: "Deload", desc: "4-5 reps left in the tank" }
+};
+const TARGET = PHASE_TARGETS[CURRENT_WEEK];
+
+// ── State ──
+let completedSets = 0;
+let timerInterval = null;
+let timerSeconds = 0;
+let currentExercise = 0;
+let currentSet = 0;
+let chatOpen = false;
+let sessionLog = []; // {ei, si, weight, reps, rpe}
+let pendingRpe = null; // {ei, si} -- waiting for RPE input
+
+// ── Tess Coaching Engine ──
+const TESS = {
+  greetings: [
+    "Pull B day. Vertical emphasis -- lats are the star. You've got the Push B finish tacked on at the end for shoulders and triceps. 32 sets total. Let's get after it.",
+    "Good morning. Big pull session plus the shoulders and tri work from yesterday. I'll be here between sets. Let's go."
+  ],
+
+  getContext() {
+    const ex = EXERCISES[currentExercise];
+    const done = sessionLog.filter(l => l.ei === currentExercise);
+    const totalDone = sessionLog.length;
+    const lastSet = sessionLog[sessionLog.length - 1];
+    return { ex, done, totalDone, lastSet, currentExercise, currentSet };
+  },
+
+  respond(input) {
+    const msg = input.toLowerCase().trim();
+    const ctx = this.getContext();
+
+    // RPE / difficulty check-ins
+    if (msg.match(/rpe\s*(\d+)/)) {
+      const rpe = parseInt(msg.match(/rpe\s*(\d+)/)[1]);
+      if (rpe >= 9) return `RPE ${rpe} on set ${ctx.done.length} of ${ctx.ex.name}. That's at the ceiling for Week 1. If the next set feels like a grind, drop 5-10%. We're building baselines, not testing maxes.`;
+      if (rpe >= 7) return `RPE ${rpe}. Right in the zone for accumulation. Keep that weight for the remaining sets.`;
+      if (rpe < 7) return `RPE ${rpe}? You've got room. Consider adding 5 lbs next set. We want RPE 7-8 for this phase.`;
+    }
+
+    // "heavy" / "hard" / "struggle"
+    if (msg.match(/heavy|hard|struggle|tough|grinding|brutal|dying/)) {
+      if (ctx.done.length >= 2) {
+        return `You're ${ctx.done.length} sets deep on ${ctx.ex.name}. If reps are dropping below the target range, drop 10% and finish clean. Quality reps over ego weight. Week 1 is about establishing what's real.`;
+      }
+      return `Noted. If you're grinding early, the weight might be too ambitious for accumulation. Drop 5 lbs and own the full rep range. We build from honest baselines.`;
+    }
+
+    // "easy" / "light"
+    if (msg.match(/easy|light|too light|cake|cruise/)) {
+      return `Good to know. Add 5 lbs next set and see where RPE lands. We want 7-8 for this phase -- not coasting, not grinding.`;
+    }
+
+    // Form / technique questions
+    if (msg.match(/form|technique|doing.*(right|wrong|correct)|how.*(should|do)/)) {
+      const cue = ctx.ex.cues[Math.min(ctx.done.length, ctx.ex.cues.length - 1)];
+      return cue;
+    }
+
+    // Pain / discomfort
+    if (msg.match(/pain|hurt|sharp|twinge|ache|sore|tight/)) {
+      if (msg.match(/shoulder/)) return "Stop the set. If it's a sharp pain, we're done with that exercise. Swap to a pain-free variation. If it's tightness, do 10 band pull-aparts and reassess. Your shoulders have to last longer than this workout.";
+      if (msg.match(/back|sciatica|spine/)) return "If it's sciatica flaring, switch to chest-supported variations only. No standing rows, no deadlift patterns. Do some cat-cows and hip circles before the next set. If it's sharp, we stop lower body loading entirely.";
+      if (msg.match(/achilles|calf|ankle/)) return "Achilles is non-negotiable. Ice after the session. If it's reactive during the movement, stop that exercise. We replace, we don't push through tendon issues.";
+      return "Where exactly? If it's joint pain or sharp, stop and we modify. If it's muscle soreness or tightness, work through it with controlled reps and a proper warmup set.";
+    }
+
+    // Weight decisions
+    if (msg.match(/go up|add weight|increase|more weight|bump/)) {
+      if (ctx.done.length > 0) {
+        const lastReps = parseInt(ctx.done[ctx.done.length - 1].reps);
+        const repTarget = parseInt(ctx.ex.reps);
+        if (lastReps >= repTarget) return `You hit the top of the range last set. Add 5 lbs. If reps drop below ${ctx.ex.reps.split('-')[0]}, come back down next session.`;
+        return `You're not hitting the top of the rep range yet. Stay at this weight until you own all sets at ${ctx.ex.reps}. Then we go up.`;
+      }
+      return "First establish your working weight at the top of the rep range across all sets. Then we add. Patience builds the base.";
+    }
+
+    // "what's next" / "next exercise"
+    if (msg.match(/what.*(next|now)|next.*(exercise|up)|move on|done with/)) {
+      if (currentExercise < EXERCISES.length - 1) {
+        const next = EXERCISES[currentExercise + 1];
+        return `Next up: ${next.name}. ${next.sets} sets of ${next.reps}. ${next.prediction ? 'Predicted: ' + next.prediction + '.' : 'No baseline yet -- start conservative and find your working weight.'} ${next.cues[0]}`;
+      }
+      return "That's the last exercise. Finish these sets strong and we'll wrap it up.";
+    }
+
+    // Fatigue / energy
+    if (msg.match(/tired|fatigue|gassed|low energy|dragging|flat/)) {
+      const pct = Math.round((completedSets / TOTAL_SETS) * 100);
+      if (pct > 70) return `You're ${pct}% through. The finish line is close. Drop to the low end of the rep range if you need to, but finish every exercise. The last 30% is where discipline separates you.`;
+      if (pct > 40) return `Halfway point fatigue is normal. Make sure you're hydrated. If you need an extra 30 seconds rest between sets, take it. Better to recover and hit quality reps than rush through garbage.`;
+      return "If you're flat early, consider whether sleep or nutrition is the issue. For today: dial RPE back to 7, focus on technique, and get through the session. A completed workout at RPE 7 beats a half-finished one at RPE 9.";
+    }
+
+    // How am I doing / progress
+    if (msg.match(/how.*(doing|going|look)|progress|status/)) {
+      const pct = Math.round((completedSets / TOTAL_SETS) * 100);
+      const remaining = TOTAL_SETS - completedSets;
+      if (pct === 0) return "Just getting started. 32 sets ahead of you. Focus on the first exercise and let the session build.";
+      if (pct < 30) return `${completedSets} sets down, ${remaining} to go. Still warming into the session. Building the foundation.`;
+      if (pct < 60) return `${pct}% through. ${remaining} sets left. You're in the thick of it. Keep the quality high.`;
+      if (pct < 90) return `${pct}% done. ${remaining} sets to close it out. You're in the home stretch. Don't coast -- finish each set like it matters.`;
+      return `${pct}% done. Almost there. Finish strong. Every rep counts in the last few sets.`;
+    }
+
+    // Motivation
+    if (msg.match(/let.*(go|do)|ready|here we go|send it/)) {
+      const phrases = [
+        "Let's go. Controlled reps, full ROM, no wasted sets.",
+        "Focus in. This set, this rep. Nothing else matters right now.",
+        "You're here. The hard part was showing up. Now execute.",
+      ];
+      return phrases[Math.floor(Math.random() * phrases.length)];
+    }
+
+    // Skip / swap exercise
+    if (msg.match(/skip|swap|replace|substitute|different/)) {
+      return `What do you want to swap out and why? If it's pain, we modify immediately. If it's equipment availability, tell me what you have access to and I'll pick the best alternative.`;
+    }
+
+    // Rest time
+    if (msg.match(/rest|how long|timer|break/)) {
+      return `Prescribed rest for ${ctx.ex.name} is ${ctx.ex.rest} seconds. If you're still breathing hard at the end, add 15-30 seconds. Recovery between sets matters more than rushing through.`;
+    }
+
+    // General / catch-all with contextual awareness
+    if (ctx.done.length > 0) {
+      const lastWeight = ctx.done[ctx.done.length - 1].weight;
+      const lastReps = ctx.done[ctx.done.length - 1].reps;
+      return `Got it. You're on ${ctx.ex.name}, ${ctx.done.length} of ${ctx.ex.sets} sets done. Last set was ${lastWeight} lb x ${lastReps}. ${ctx.ex.cues[Math.min(ctx.done.length, ctx.ex.cues.length - 1)]}`;
+    }
+
+    // Default contextual response
+    const cue = ctx.ex.cues[0];
+    return `You're on ${ctx.ex.name} (${ctx.ex.sets}x${ctx.ex.reps}). ${cue}`;
+  }
+};
+
+// ── Render ──
+function renderExercises() {
+  const container = document.getElementById('exercises');
+  let html = '';
+  let lastSection = null;
+
+  EXERCISES.forEach((ex, ei) => {
+    if (ex.section !== lastSection) {
+      if (ex.section === 'pull') {
+        html += `<div class="section-divider"><span class="label">Pull B</span><span class="desc">Vertical Emphasis</span></div>`;
+      } else if (ex.section === 'push') {
+        html += `<div class="section-divider"><span class="label">Push B Finish</span><span class="desc">Shoulders + Triceps from yesterday</span></div>`;
+      }
+      lastSection = ex.section;
+    }
+
+    const setsHTML = Array.from({length: ex.sets}, (_, si) => `
+      <div class="set-row" data-ex="${ei}" data-set="${si}">
+        <div class="set-label">${si + 1}</div>
+        <input class="set-input" type="text" inputmode="decimal" placeholder="lbs" data-field="weight" data-ex="${ei}" data-set="${si}">
+        <input class="set-input" type="text" inputmode="numeric" placeholder="reps" data-field="reps" data-ex="${ei}" data-set="${si}">
+        <button class="set-check" onclick="logSet(${ei}, ${si}, this)" data-ex="${ei}" data-set="${si}">&#10003;</button>
+      </div>
+    `).join('');
+
+    html += `
+      <div class="exercise-card ${ei === 0 ? 'active-exercise' : ''}" id="card-${ei}">
+        <div class="exercise-header">
+          <div class="exercise-num">${ei + 1}</div>
+          <div class="exercise-name">${ex.name}</div>
+          <div class="exercise-meta">${ex.sets}x${ex.reps} / ${ex.rest}s</div>
+        </div>
+        <div class="exercise-note">${ex.note}</div>
+        ${ex.prediction ? `<div class="prediction">Predicted: ${ex.prediction}</div>` : ''}
+        <div class="sets-grid">
+          <div class="set-row header">
+            <span>Set</span><span>Weight</span><span>Reps</span><span></span>
+          </div>
+          ${setsHTML}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+}
+
+// ── Set Logging ──
+function logSet(ei, si, btn) {
+  if (btn.classList.contains('done')) return;
+
+  const row = btn.closest('.set-row');
+  const weightInput = row.querySelector('[data-field="weight"]');
+  const repsInput = row.querySelector('[data-field="reps"]');
+
+  if (!weightInput.value || !repsInput.value) {
+    weightInput.focus();
+    return;
+  }
+
+  btn.classList.add('done');
+  weightInput.classList.add('logged');
+  repsInput.classList.add('logged');
+  weightInput.readOnly = true;
+  repsInput.readOnly = true;
+
+  // Track state
+  currentExercise = ei;
+  currentSet = si;
+  sessionLog.push({ ei, si, weight: weightInput.value, reps: repsInput.value, rpe: null });
+  completedSets++;
+  updateProgress();
+  startTimer(EXERCISES[ei].rest, EXERCISES[ei].name);
+
+  // Show RPE picker inline
+  pendingRpe = { ei, si, logIndex: sessionLog.length - 1 };
+  showRpePicker(row, ei, si);
+
+  // Update active exercise highlight
+  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active-exercise'));
+  const card = document.getElementById(`card-${ei}`);
+  const allChecks = card.querySelectorAll('.set-check');
+  const allDone = [...allChecks].every(c => c.classList.contains('done'));
+
+  if (allDone) {
+    card.classList.add('complete');
+    card.classList.remove('active-exercise');
+    if (ei < EXERCISES.length - 1) {
+      document.getElementById(`card-${ei + 1}`).classList.add('active-exercise');
+      const next = EXERCISES[ei + 1];
+      const isNewSection = EXERCISES[ei].section !== next.section;
+      if (isNewSection) {
+        addTessMessage(`Switching gears. ${next.section === 'push' ? 'Push B finish -- shoulders and triceps from yesterday.' : ''} Next: ${next.name}. ${next.sets}x${next.reps}. ${next.cues[0]}`);
+      }
+    } else {
+      addTessMessage("That's the last exercise. Session complete. Copy your log and let's get out of here. Good work today.");
+    }
+  } else {
+    card.classList.add('active-exercise');
+  }
+
+  // Auto-fill weight for next set
+  if (si < EXERCISES[ei].sets - 1) {
+    const nextWeight = card.querySelector(`[data-field="weight"][data-set="${si + 1}"]`);
+    if (nextWeight && !nextWeight.value) {
+      nextWeight.value = weightInput.value;
+    }
+  }
+}
+
+function showRpePicker(afterRow, ei, si) {
+  // Remove any existing picker
+  document.querySelectorAll('.rpe-row, .rpe-hint').forEach(el => el.remove());
+
+  const rpeRow = document.createElement('div');
+  rpeRow.className = 'rpe-row';
+  rpeRow.innerHTML = `
+    <span class="rpe-label">RPE</span>
+    <div class="rpe-pills">
+      ${[6, 7, 8, 9, 10].map(v => `<button class="rpe-pill" data-rpe="${v}" data-ei="${ei}" data-si="${si}">${v}</button>`).join('')}
+    </div>
+  `;
+
+  const hint = document.createElement('div');
+  hint.className = 'rpe-hint';
+  hint.textContent = `Target: RPE ${TARGET.rpe[0]}-${TARGET.rpe[1]} (${TARGET.desc})`;
+
+  afterRow.after(hint);
+  afterRow.after(rpeRow);
+
+  // Attach click handlers
+  rpeRow.querySelectorAll('.rpe-pill').forEach(pill => {
+    pill.addEventListener('click', () => selectRpe(pill, ei, si));
+  });
+}
+
+function selectRpe(pill, ei, si) {
+  const rpe = parseInt(pill.dataset.rpe);
+
+  // Visual selection
+  pill.closest('.rpe-pills').querySelectorAll('.rpe-pill').forEach(p => p.classList.remove('selected'));
+  pill.classList.add('selected');
+
+  // Store RPE
+  if (pendingRpe && pendingRpe.logIndex !== undefined) {
+    sessionLog[pendingRpe.logIndex].rpe = rpe;
+  }
+
+  // Tess reacts to RPE vs target
+  const inRange = rpe >= TARGET.rpe[0] && rpe <= TARGET.rpe[1];
+  const tooHard = rpe > TARGET.rpe[1];
+  const tooEasy = rpe < TARGET.rpe[0];
+  const ex = EXERCISES[ei];
+  const setNum = si + 1;
+  const setsLeft = ex.sets - setNum;
+
+  let response;
+  if (tooHard && rpe >= 10) {
+    response = `RPE 10 on set ${setNum}. That's failure -- not the plan for ${TARGET.label} phase. Drop 10% next set. We need ${setsLeft > 0 ? setsLeft + ' more sets' : 'to finish'} with quality reps, not grinding.`;
+  } else if (tooHard) {
+    response = `RPE ${rpe}. Running hotter than the ${TARGET.label} target of ${TARGET.rpe[0]}-${TARGET.rpe[1]}.${setsLeft > 0 ? ` Drop 5 lbs for the remaining ${setsLeft} set${setsLeft > 1 ? 's' : ''}. We\'re building the base -- save the heavy singles for Week 5.` : ' Note that for next session.'}`;
+  } else if (tooEasy) {
+    response = `RPE ${rpe}. You've got more in the tank than the target calls for.${setsLeft > 0 ? ` Add 5 lbs next set and see if you land in the ${TARGET.rpe[0]}-${TARGET.rpe[1]} range.` : ' Bump the weight next session.'}`;
+  } else {
+    const phrases = [
+      `RPE ${rpe}. Right where we want it for ${TARGET.label}. ${TARGET.desc}. Keep this weight.`,
+      `RPE ${rpe}. Dialed in. That's the zone for Week ${CURRENT_WEEK}.${setsLeft > 0 ? ` ${setsLeft} set${setsLeft > 1 ? 's' : ''} to go at this weight.` : ''}`,
+      `RPE ${rpe}. Perfect. This is what accumulation should feel like -- controlled, productive, sustainable.`
+    ];
+    response = phrases[Math.floor(Math.random() * phrases.length)];
+  }
+
+  addTessMessage(response);
+
+  // Fade out picker after selection
+  setTimeout(() => {
+    const row = pill.closest('.rpe-row');
+    const hint = row.nextElementSibling;
+    if (hint && hint.classList.contains('rpe-hint')) hint.style.opacity = '0.4';
+    row.style.opacity = '0.5';
+    row.style.pointerEvents = 'none';
+  }, 600);
+
+  pendingRpe = null;
+}
+
+// ── Progress ──
+function updateProgress() {
+  const pct = Math.round((completedSets / TOTAL_SETS) * 100);
+  document.getElementById('progressText').textContent = `${completedSets} / ${TOTAL_SETS}`;
+  document.getElementById('progressPct').textContent = pct > 0 ? `${pct}%` : '';
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+// ── Timer ──
+function startTimer(seconds, exerciseName) {
+  clearInterval(timerInterval);
+  timerSeconds = seconds;
+  const bar = document.getElementById('timerBar');
+  const display = document.getElementById('timerDisplay');
+  const label = document.getElementById('timerLabel');
+
+  bar.classList.add('active');
+  label.textContent = `Rest -- ${exerciseName}`;
+  display.textContent = formatTime(timerSeconds);
+  display.style.color = '';
+
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    display.textContent = formatTime(timerSeconds);
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      display.textContent = "GO";
+      display.style.color = 'var(--green)';
+      if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+      setTimeout(() => { bar.classList.remove('active'); display.style.color = ''; }, 3000);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  document.getElementById('timerBar').classList.remove('active');
+}
+
+function formatTime(s) {
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+}
+
+// ── Chat ──
+function openChat() {
+  const panel = document.getElementById('chatPanel');
+  if (!chatOpen) {
+    panel.classList.add('open');
+    chatOpen = true;
+    panel.scrollTop = panel.scrollHeight;
+  }
+}
+
+function addUserMessage(text) {
+  openChat();
+  const messages = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg user';
+  msg.textContent = text;
+  messages.appendChild(msg);
+  scrollChat();
+}
+
+function addTessMessage(text) {
+  openChat();
+  const messages = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg tess';
+  msg.innerHTML = `<div class="tess-name">Tess</div>${text}`;
+  messages.appendChild(msg);
+  scrollChat();
+}
+
+function addSystemMessage(text) {
+  openChat();
+  const messages = document.getElementById('chatMessages');
+  const msg = document.createElement('div');
+  msg.className = 'chat-msg system';
+  msg.textContent = text;
+  messages.appendChild(msg);
+  scrollChat();
+}
+
+function scrollChat() {
+  const panel = document.getElementById('chatPanel');
+  requestAnimationFrame(() => { panel.scrollTop = panel.scrollHeight; });
+}
+
+function sendMessage() {
+  const input = document.getElementById('promptInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addUserMessage(text);
+  input.value = '';
+  document.getElementById('promptSend').classList.remove('ready');
+
+  // Slight delay for natural feel
+  setTimeout(() => {
+    const response = TESS.respond(text);
+    addTessMessage(response);
+  }, 300 + Math.random() * 400);
+}
+
+// ── Input handlers ──
+const promptInput = document.getElementById('promptInput');
+const promptSend = document.getElementById('promptSend');
+
+promptInput.addEventListener('input', () => {
+  promptSend.classList.toggle('ready', promptInput.value.trim().length > 0);
+});
+
+promptInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// Enter on reps field logs the set
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.dataset.field === 'reps') {
+    e.preventDefault();
+    const ei = parseInt(e.target.dataset.ex);
+    const si = parseInt(e.target.dataset.set);
+    const check = document.querySelector(`.set-check[data-ex="${ei}"][data-set="${si}"]`);
+    if (check && !check.classList.contains('done')) check.click();
+  }
+});
+
+// ── Copy Log ──
+function copyLog() {
+  function buildTable(exercises, indices) {
+    let t = `| # | Exercise | Set 1 | Set 2 | Set 3 | Set 4 |\n`;
+    t += `|---|----------|-------|-------|-------|-------|\n`;
+    exercises.forEach((ex, i) => {
+      const ei = indices[i];
+      const sets = [];
+      for (let si = 0; si < 4; si++) {
+        if (si < ex.sets) {
+          const w = document.querySelector(`[data-field="weight"][data-ex="${ei}"][data-set="${si}"]`);
+          const r = document.querySelector(`[data-field="reps"][data-ex="${ei}"][data-set="${si}"]`);
+          const logEntry = sessionLog.find(l => l.ei === ei && l.si === si);
+          if (w && r && w.value && r.value) {
+            let cell = `${w.value} lb x ${r.value}`;
+            if (logEntry && logEntry.rpe) cell += ` (RPE ${logEntry.rpe})`;
+            sets.push(cell);
+          } else sets.push('--');
+        } else sets.push('--');
+      }
+      t += `| ${i + 1} | ${ex.name} | ${sets.join(' | ')} |\n`;
+    });
+    return t;
+  }
+
+  const pullExercises = [], pullIndices = [];
+  const pushExercises = [], pushIndices = [];
+  EXERCISES.forEach((ex, ei) => {
+    if (ex.section === 'pull') { pullExercises.push(ex); pullIndices.push(ei); }
+    else { pushExercises.push(ex); pushIndices.push(ei); }
+  });
+
+  let log = `## 2026-03-20 | Week 1, Fri: Pull B: Vertical Emphasis\n\n`;
+  log += buildTable(pullExercises, pullIndices);
+  log += `\n### Push B Finish (Shoulders + Triceps from 3/19)\n\n`;
+  log += buildTable(pushExercises, pushIndices);
+
+  navigator.clipboard.writeText(log).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  });
+}
+
+// ── Init ──
+renderExercises();
+updateProgress();
+
+// Welcome message after a beat
+setTimeout(() => {
+  addTessMessage(TESS.greetings[Math.floor(Math.random() * TESS.greetings.length)]);
+}, 800);
+</script>
+</body>
+</html>
