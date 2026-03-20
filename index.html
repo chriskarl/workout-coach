@@ -20,7 +20,7 @@
     --accent-border: rgba(74, 158, 255, 0.3);
     --green: #34d399;
     --green-glow: rgba(52, 211, 153, 0.15);
-    --amber: #fbbf24;
+    --amber: #888;
     --tess: #c084fc;
     --tess-glow: rgba(192, 132, 252, 0.12);
     --tess-border: rgba(192, 132, 252, 0.25);
@@ -97,7 +97,7 @@
   }
   .section-divider .label {
     font-size: 12px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--amber);
+    letter-spacing: 0.8px; color: var(--text-dim);
   }
   .section-divider .desc { font-size: 12px; color: var(--text-dim); }
 
@@ -184,7 +184,7 @@
   .rpe-pill[data-rpe="6"] { }
   .rpe-pill[data-rpe="7"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
   .rpe-pill[data-rpe="8"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
-  .rpe-pill[data-rpe="9"].selected { border-color: var(--amber); color: var(--amber); background: rgba(251, 191, 36, 0.12); }
+  .rpe-pill[data-rpe="9"].selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
   .rpe-pill[data-rpe="10"].selected { border-color: #f87171; color: #f87171; background: rgba(248, 113, 113, 0.12); }
   .rpe-hint {
     font-size: 10px; color: var(--text-muted); text-align: center;
@@ -197,8 +197,22 @@
     background: rgba(10, 10, 10, 0.96);
     backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid var(--border);
-    transition: height 0.3s ease;
+    transition: transform 0.3s ease;
   }
+  .bottom-dock.minimized .chat-panel,
+  .bottom-dock.minimized .prompt-area,
+  .bottom-dock.minimized .timer-strip {
+    display: none !important;
+  }
+  .dock-handle {
+    display: flex; justify-content: center; padding: 6px 0 2px;
+    cursor: pointer; -webkit-user-select: none; user-select: none;
+  }
+  .dock-handle-bar {
+    width: 36px; height: 4px; border-radius: 2px;
+    background: var(--border-light); transition: background 0.2s;
+  }
+  .dock-handle:active .dock-handle-bar { background: var(--text-dim); }
 
   /* ── Progress Strip ── */
   .progress-strip {
@@ -318,6 +332,7 @@
 
 <!-- Bottom Dock -->
 <div class="bottom-dock" id="bottomDock">
+  <div class="dock-handle" id="dockHandle"><div class="dock-handle-bar"></div></div>
   <div class="timer-strip" id="timerStrip">
     <div class="timer-icon">T</div>
     <div class="timer-content">
@@ -805,7 +820,7 @@ function startTimer(seconds, exerciseName) {
     // 10-second warning
     if (!soonCued && timerSeconds <= 10 && timerSeconds > 0) {
       cue.textContent = pickCue(REST_CUES.soon);
-      countdown.style.color = 'var(--amber)';
+      countdown.style.color = 'var(--tess)';
       soonCued = true;
     }
 
@@ -962,6 +977,51 @@ function copyLog() {
     setTimeout(() => toast.classList.remove('show'), 2000);
   });
 }
+
+// ── Dock Toggle ──
+let dockMinimized = false;
+const dock = document.getElementById('bottomDock');
+const dockHandle = document.getElementById('dockHandle');
+
+function toggleDock() {
+  dockMinimized = !dockMinimized;
+  dock.classList.toggle('minimized', dockMinimized);
+  // Adjust body padding
+  document.body.style.paddingBottom = dockMinimized ? '60px' : '160px';
+}
+
+dockHandle.addEventListener('click', toggleDock);
+
+// Swipe gesture on dock
+let touchStartY = 0;
+let touchStartTime = 0;
+dock.addEventListener('touchstart', (e) => {
+  touchStartY = e.touches[0].clientY;
+  touchStartTime = Date.now();
+}, { passive: true });
+
+dock.addEventListener('touchend', (e) => {
+  const deltaY = e.changedTouches[0].clientY - touchStartY;
+  const elapsed = Date.now() - touchStartTime;
+  // Quick swipe (< 300ms) with enough distance (> 30px)
+  if (elapsed < 300 && Math.abs(deltaY) > 30) {
+    if (deltaY > 0 && !dockMinimized) toggleDock(); // swipe down = minimize
+    if (deltaY < 0 && dockMinimized) toggleDock(); // swipe up = expand
+  }
+}, { passive: true });
+
+// Auto-expand dock when timer starts or Tess sends a message
+const origStartTimer = startTimer;
+startTimer = function(seconds, exerciseName) {
+  if (dockMinimized) toggleDock();
+  origStartTimer(seconds, exerciseName);
+};
+
+const origAddTessMessage = addTessMessage;
+addTessMessage = function(text) {
+  if (dockMinimized) toggleDock();
+  origAddTessMessage(text);
+};
 
 // ── Init ──
 renderExercises();
