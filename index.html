@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Hone — Legs B</title>
+<title>Hone — Pull B</title>
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --surface-2: #1e1e1e;
-    --surface-3: #252525;
+    --bg: #121212;
+    --bg-deep: #0a0a0a;
+    --surface: #1a1a1a;
+    --surface-2: #222;
+    --surface-3: #2a2a2a;
     --border: #2a2a2a;
     --border-light: #333;
     --text: #e8e8e8;
@@ -19,8 +20,10 @@
     --accent-glow: rgba(74, 158, 255, 0.15);
     --accent-border: rgba(74, 158, 255, 0.3);
     --green: #34d399;
+    --green-dim: #2a9e75;
     --green-glow: rgba(52, 211, 153, 0.15);
-    --amber: #888;
+    --amber: #fbbf24;
+    --red: #f87171;
     --tess: #c084fc;
     --tess-glow: rgba(192, 132, 252, 0.12);
     --tess-border: rgba(192, 132, 252, 0.25);
@@ -29,27 +32,44 @@
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100dvh;
-    padding: 0 0 160px 0;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100dvh;
   }
 
-  /* ── Header ── */
-  header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: rgba(10, 10, 10, 0.92);
+  /* ═══════════════════════════════
+     MODE: REVIEW (session overview)
+     ═══════════════════════════════ */
+
+  #reviewMode {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 200px;
+  }
+  #reviewMode.hidden {
+    opacity: 0; transform: scale(0.96);
+    pointer-events: none;
+  }
+
+  .review-header {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(18, 18, 18, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--border);
     padding: 16px 20px;
   }
-  header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
-  header .subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
+  .review-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .review-header .subtitle { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
   .phase-badge {
     display: inline-block; font-size: 11px; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.5px;
@@ -57,39 +77,36 @@
     padding: 3px 8px; border-radius: 4px; margin-top: 6px;
   }
 
-  /* ── Timer (in dock) ── */
-  .timer-strip {
-    display: none; align-items: center; gap: 12px;
-    padding: 10px 20px;
-    border-bottom: 1px solid var(--border);
-    background: var(--tess-glow);
+  /* Start Session Button */
+  .start-session-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin: 20px 16px 8px;
+    padding: 18px 24px;
+    background: var(--accent);
+    border: none; border-radius: 16px;
+    font-size: 17px; font-weight: 700;
+    color: #000; cursor: pointer;
+    transition: transform 0.15s, opacity 0.15s;
+    letter-spacing: -0.2px;
   }
-  .timer-strip.active { display: flex; }
-  .timer-icon {
-    width: 28px; height: 28px; border-radius: 8px;
-    background: var(--tess-glow); border: 1px solid var(--tess-border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: var(--tess);
-    text-transform: uppercase; letter-spacing: 0.3px; flex-shrink: 0;
-  }
-  .timer-content { flex: 1; }
-  .timer-countdown {
-    font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums;
-    color: var(--text); line-height: 1;
-  }
-  .timer-cue {
-    font-size: 12px; color: var(--tess); margin-top: 2px;
-    line-height: 1.3;
-  }
-  .timer-skip {
-    background: var(--surface-2); border: 1px solid var(--border);
-    color: var(--text-dim); font-size: 12px; font-weight: 600;
-    padding: 5px 12px; border-radius: 8px; cursor: pointer;
-    transition: all 0.15s;
-  }
-  .timer-skip:active { background: var(--surface-3); }
+  .start-session-btn:active { transform: scale(0.97); opacity: 0.9; }
+  .start-session-btn .arrow { font-size: 20px; }
 
-  /* ── Section Divider ── */
+  /* Session Summary Bar */
+  .session-summary {
+    display: flex; gap: 1px; margin: 12px 16px;
+    background: var(--border); border-radius: 12px; overflow: hidden;
+  }
+  .summary-stat {
+    flex: 1; background: var(--surface);
+    padding: 12px 8px; text-align: center;
+  }
+  .summary-stat:first-child { border-radius: 12px 0 0 12px; }
+  .summary-stat:last-child { border-radius: 0 12px 12px 0; }
+  .summary-stat .val { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .summary-stat .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* Section Divider */
   .section-divider {
     margin: 20px 16px 4px; padding: 10px 16px;
     background: var(--surface-2); border: 1px solid var(--border);
@@ -101,79 +118,106 @@
   }
   .section-divider .desc { font-size: 12px; color: var(--text-dim); }
 
-  /* ── Exercise Cards ── */
-  .exercise-card {
+  /* Exercise Cards (Review Mode) */
+  .review-card {
     margin: 12px 16px; background: var(--surface);
     border: 1px solid var(--border); border-radius: 14px;
     overflow: hidden; transition: border-color 0.2s;
   }
-  .exercise-card.complete { border-color: rgba(52, 211, 153, 0.3); }
-  .exercise-card.active-exercise { border-color: var(--accent-border); }
-  .exercise-header {
+  .review-card.complete { border-color: rgba(52, 211, 153, 0.3); }
+  .review-card.active-card { border-color: var(--accent-border); }
+  .review-card-header {
     padding: 14px 16px; display: flex; align-items: center;
-    gap: 12px; border-bottom: 1px solid var(--border);
+    gap: 12px; border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
   }
-  .exercise-num {
+  .review-card.expanded .review-card-header { border-bottom-color: var(--border); }
+  .review-card-num {
     width: 28px; height: 28px; border-radius: 8px;
     background: var(--surface-2); display: flex; align-items: center;
     justify-content: center; font-size: 13px; font-weight: 700;
     color: var(--text-dim); flex-shrink: 0;
   }
-  .exercise-card.complete .exercise-num { background: var(--green-glow); color: var(--green); }
-  .exercise-card.active-exercise .exercise-num { background: var(--accent-glow); color: var(--accent); }
-  .exercise-name { font-size: 15px; font-weight: 600; flex: 1; }
-  .exercise-meta { font-size: 12px; color: var(--text-dim); }
-  .exercise-note {
+  .review-card.complete .review-card-num { background: var(--green-glow); color: var(--green); }
+  .review-card.active-card .review-card-num { background: var(--accent-glow); color: var(--accent); }
+  .review-card-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .review-card-meta { font-size: 12px; color: var(--text-dim); }
+  .review-card-chevron {
+    font-size: 14px; color: var(--text-muted); transition: transform 0.3s ease;
+    flex-shrink: 0; margin-left: 4px;
+  }
+  .review-card.expanded .review-card-chevron { transform: rotate(180deg); }
+  .review-card-header { cursor: pointer; }
+  .review-card-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .review-card.expanded .review-card-body { max-height: 80dvh; }
+
+  /* Collapsed cards: ultra-compact */
+  .review-card:not(.expanded) { margin: 4px 16px; }
+  .review-card:not(.expanded) .review-card-header { padding: 10px 14px; }
+  .review-card:not(.expanded) .review-card-name { font-size: 13px; }
+  .review-card:not(.expanded) .review-card-meta { display: none; }
+
+  /* Expanded card: generous, owns the screen */
+  .review-card.expanded { margin: 16px 12px; }
+  .review-card.expanded .review-card-header { padding: 16px 18px; }
+  .review-card.expanded .review-card-name { font-size: 18px; font-weight: 700; }
+  .review-card.expanded .review-card-note { padding: 12px 18px; font-size: 14px; line-height: 1.5; }
+  .review-card.expanded .review-sets { padding: 12px 14px 20px; }
+  .review-card.expanded .review-set-row { padding: 10px 0; gap: 10px; }
+  .review-card.expanded .review-input { padding: 14px 12px; font-size: 18px; font-weight: 600; border-radius: 10px; }
+  .review-card.expanded .review-check { width: 44px; height: 44px; border-radius: 12px; font-size: 18px; }
+  .review-card.expanded .set-label { font-size: 15px; font-weight: 700; }
+  .review-card-note {
     padding: 8px 16px; font-size: 12px; color: var(--text-dim);
     background: var(--surface-2); border-bottom: 1px solid var(--border); line-height: 1.4;
   }
-  .prediction { font-size: 11px; color: var(--accent); text-align: center; padding: 4px 0 2px; }
 
-  /* ── Sets Grid ── */
-  .sets-grid { padding: 8px 12px 12px; }
-  .set-row {
+  /* Review Sets Grid */
+  .review-sets { padding: 8px 12px 12px; }
+  .review-set-row {
     display: grid; grid-template-columns: 36px 1fr 1fr 44px;
     gap: 8px; align-items: center; padding: 6px 0;
   }
-  .set-row.header { padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
-  .set-row.header span {
+  .review-set-row.header { padding-bottom: 4px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+  .review-set-row.header span {
     font-size: 11px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 0.5px; color: var(--text-dim);
   }
   .set-label { font-size: 13px; font-weight: 600; color: var(--text-dim); text-align: center; }
-  .set-input {
+  .review-input {
     background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px;
     color: var(--text); font-size: 15px; font-weight: 500;
     padding: 10px 12px; width: 100%; text-align: center;
     font-variant-numeric: tabular-nums; transition: border-color 0.2s; -webkit-appearance: none;
   }
-  .set-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-  .set-input::placeholder { color: #444; font-weight: 400; }
-  .set-input.predicted { color: #555; }
-  .set-input.predicted:focus { color: var(--text); }
-  .set-input.logged { border-color: rgba(52, 211, 153, 0.4); background: var(--green-glow); color: var(--text); }
-  .set-check {
+  .review-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .review-input::placeholder { color: #444; font-weight: 400; }
+  .review-input.predicted { color: #555; }
+  .review-input.predicted:focus { color: var(--text); }
+  .review-input.logged { border-color: rgba(52, 211, 153, 0.4); background: var(--green-glow); color: var(--text); }
+  .review-check {
     width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border);
     background: transparent; cursor: pointer; display: flex; align-items: center;
     justify-content: center; transition: all 0.2s; color: transparent; font-size: 16px;
   }
-  .set-check.done { background: var(--green); border-color: var(--green); color: #000; }
+  .review-check.done { background: var(--green); border-color: var(--green); color: #000; }
 
-  /* ── RPE Picker ── */
+  /* RPE (Review Mode) */
   .rpe-row {
     grid-column: 1 / -1;
     display: flex; align-items: center; gap: 6px;
     padding: 6px 0 2px;
-    animation: msgIn 0.2s ease;
+    animation: fadeSlideIn 0.2s ease;
   }
   .rpe-label {
     font-size: 11px; font-weight: 600; color: var(--tess);
     text-transform: uppercase; letter-spacing: 0.5px;
     white-space: nowrap; margin-right: 2px;
   }
-  .rpe-pills {
-    display: flex; gap: 4px; flex: 1;
-  }
+  .rpe-pills { display: flex; gap: 4px; flex: 1; }
   .rpe-pill {
     flex: 1; height: 34px; border-radius: 8px;
     border: 1px solid var(--border); background: var(--surface-2);
@@ -183,79 +227,317 @@
   }
   .rpe-pill:active { transform: scale(0.94); }
   .rpe-pill.selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
-  .rpe-pill[data-rpe="6"] { }
-  .rpe-pill[data-rpe="7"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
-  .rpe-pill[data-rpe="8"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+  .rpe-pill[data-rpe="7"].selected, .rpe-pill[data-rpe="8"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
   .rpe-pill[data-rpe="9"].selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
-  .rpe-pill[data-rpe="10"].selected { border-color: #f87171; color: #f87171; background: rgba(248, 113, 113, 0.12); }
+  .rpe-pill[data-rpe="10"].selected { border-color: var(--red); color: var(--red); background: rgba(248, 113, 113, 0.12); }
   .rpe-hint {
     font-size: 10px; color: var(--text-muted); text-align: center;
     padding: 0 0 4px; grid-column: 1 / -1;
   }
 
-  /* ── Bottom Dock ── */
-  .bottom-dock {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(10, 10, 10, 0.96);
+  /* Review Mode Bottom Bar */
+  .review-bottom {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+    background: rgba(18, 18, 18, 0.96);
     backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid var(--border);
-    transition: transform 0.3s ease;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   }
-  .bottom-dock.minimized .chat-panel,
-  .bottom-dock.minimized .prompt-area,
-  .bottom-dock.minimized .timer-strip {
-    display: none !important;
+  .review-bottom-inner {
+    display: flex; align-items: center; gap: 12px;
   }
-  .dock-handle {
-    display: flex; justify-content: center; padding: 6px 0 2px;
-    cursor: pointer; -webkit-user-select: none; user-select: none;
+  .review-progress {
+    flex: 1; display: flex; align-items: center; gap: 10px;
   }
-  .dock-handle-bar {
-    width: 36px; height: 4px; border-radius: 2px;
-    background: var(--border-light); transition: background 0.2s;
-  }
-  .dock-handle:active .dock-handle-bar { background: var(--text-dim); }
-
-  /* ── Progress Strip ── */
-  .progress-strip {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 20px; border-bottom: 1px solid var(--border);
-  }
-  .progress-left { display: flex; align-items: center; gap: 12px; }
   .progress-bar-track {
-    width: 80px; height: 4px; background: var(--surface-2);
+    flex: 1; height: 4px; background: var(--surface-2);
     border-radius: 2px; overflow: hidden;
   }
   .progress-bar-fill {
     height: 100%; background: var(--green); border-radius: 2px;
     transition: width 0.4s ease; width: 0%;
   }
-  .progress-text { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .progress-pct { font-size: 12px; color: var(--text-dim); }
+  .progress-text { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
   .copy-btn {
     background: var(--surface-2); border: 1px solid var(--border);
     color: var(--text); font-size: 12px; font-weight: 600;
-    padding: 6px 14px; border-radius: 8px; cursor: pointer;
-    transition: all 0.2s;
+    padding: 8px 16px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s; white-space: nowrap;
   }
   .copy-btn:active { background: var(--surface-3); }
 
-  /* ── Chat Panel ── */
+
+  /* ═══════════════════════════════
+     MODE: WORKOUT (active session)
+     ═══════════════════════════════ */
+
+  #workoutMode {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    background: var(--bg-deep);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+  }
+  #workoutMode.hidden {
+    opacity: 0; transform: scale(1.04);
+    pointer-events: none;
+  }
+
+  /* Workout Top Bar (minimal) */
+  .workout-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    flex-shrink: 0;
+  }
+  .workout-topbar .exercise-count {
+    font-size: 13px; font-weight: 600; color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .workout-exit {
+    font-size: 13px; font-weight: 600; color: var(--text-dim);
+    background: none; border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 14px; cursor: pointer; transition: all 0.15s;
+  }
+  .workout-exit:active { background: var(--surface-2); }
+
+  /* Workout Progress Dots */
+  .workout-dots {
+    display: flex; gap: 4px; justify-content: center;
+    padding: 0 20px 12px; flex-shrink: 0;
+  }
+  .workout-dot {
+    height: 3px; border-radius: 2px;
+    background: var(--surface-3);
+    transition: background 0.3s, flex 0.3s;
+    flex: 1;
+  }
+  .workout-dot.done { background: var(--green-dim); }
+  .workout-dot.current { background: var(--accent); flex: 2; }
+
+  /* Workout Exercise Display */
+  .workout-exercise {
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 24px;
+    overflow: hidden;
+  }
+
+  .workout-exercise-name {
+    font-size: 17px; font-weight: 600; color: var(--text);
+    margin-bottom: 4px; letter-spacing: -0.2px;
+    cursor: pointer;
+  }
+  .workout-exercise-name:active { color: var(--accent); }
+  .workout-exercise-meta {
+    font-size: 13px; color: var(--text-dim); margin-bottom: 20px;
+  }
+  .workout-exercise-cue {
+    font-size: 13px; color: var(--tess); margin-bottom: 24px;
+    line-height: 1.4; min-height: 18px;
+  }
+
+  /* Active Set Display */
+  .workout-set-display {
+    display: flex; flex-direction: column; gap: 16px;
+    padding-bottom: 8px;
+  }
+
+  .workout-set-label {
+    font-size: 13px; font-weight: 600; color: var(--text-dim);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  .workout-input-row {
+    display: flex; gap: 12px; align-items: center;
+  }
+
+  .workout-input-group {
+    flex: 1; display: flex; flex-direction: column; gap: 4px;
+  }
+  .workout-input-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .workout-input {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    color: var(--text); font-size: 32px; font-weight: 700;
+    padding: 16px; width: 100%; text-align: center;
+    font-variant-numeric: tabular-nums; -webkit-appearance: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .workout-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+  .workout-input::placeholder { color: #333; font-weight: 400; }
+  .workout-input.prefilled { color: var(--text-muted); }
+  .workout-input.prefilled:focus { color: var(--text); }
+
+  /* Swipe Confirm Track */
+  .swipe-track {
+    position: relative;
+    height: 64px; margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    touch-action: pan-x;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .swipe-track-fill {
+    position: absolute; inset: 0; right: auto;
+    background: linear-gradient(90deg, var(--green-glow), rgba(52, 211, 153, 0.3));
+    width: 0; transition: width 0.05s linear;
+    border-radius: 16px;
+  }
+  .swipe-track.confirmed .swipe-track-fill {
+    width: 100% !important;
+    background: var(--green);
+    transition: width 0.15s ease;
+  }
+  .swipe-thumb {
+    position: absolute; left: 6px; top: 6px; bottom: 6px;
+    width: 52px; border-radius: 12px;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: #000;
+    transition: left 0.05s linear;
+    z-index: 2;
+  }
+  .swipe-track.confirmed .swipe-thumb {
+    left: calc(100% - 58px) !important;
+    transition: left 0.15s ease;
+  }
+  .swipe-hint {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 600; color: var(--text-muted);
+    letter-spacing: 0.3px; z-index: 1;
+    transition: opacity 0.15s;
+  }
+  .swipe-track.confirmed .swipe-hint { opacity: 0; }
+
+  /* Completed Set Badge */
+  .set-done-badge {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    height: 64px; margin-top: 16px;
+    background: var(--green-glow);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+    border-radius: 16px;
+    font-size: 15px; font-weight: 600; color: var(--green);
+    animation: fadeSlideIn 0.2s ease;
+  }
+
+  /* Workout RPE Picker */
+  .workout-rpe {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 12px;
+    animation: fadeSlideIn 0.2s ease;
+  }
+  .workout-rpe .rpe-label {
+    font-size: 12px; font-weight: 600; color: var(--tess);
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .workout-rpe .rpe-pills { display: flex; gap: 6px; flex: 1; }
+  .workout-rpe .rpe-pill {
+    flex: 1; height: 44px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--text-dim); font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .workout-rpe .rpe-pill:active { transform: scale(0.94); }
+  .workout-rpe .rpe-pill.selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
+  .workout-rpe .rpe-pill[data-rpe="7"].selected,
+  .workout-rpe .rpe-pill[data-rpe="8"].selected { border-color: var(--green); color: var(--green); background: var(--green-glow); }
+  .workout-rpe .rpe-pill[data-rpe="9"].selected { border-color: var(--tess); color: var(--tess); background: var(--tess-glow); }
+  .workout-rpe .rpe-pill[data-rpe="10"].selected { border-color: var(--red); color: var(--red); background: rgba(248, 113, 113, 0.12); }
+  .workout-rpe-skip {
+    font-size: 12px; color: var(--text-muted); text-align: center;
+    margin-top: 6px; cursor: pointer;
+  }
+  .workout-rpe-skip:active { color: var(--text-dim); }
+
+
+  /* Compact Timer Bar */
+  .timer-bar {
+    position: fixed; bottom: 60px; left: 0; right: 0; z-index: 60;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 10px 20px; display: flex; align-items: center; gap: 12px;
+    transform: translateY(100%); transition: transform 0.3s ease;
+  }
+  .timer-bar.active { transform: translateY(0); }
+  .timer-bar-time { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; min-width: 60px; }
+  .timer-bar-cue { flex: 1; font-size: 13px; color: var(--text-dim); }
+  .timer-bar-skip { background: none; border: 1px solid var(--border); color: var(--text-dim); font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+  .timer-bar.warning { border-top-color: var(--tess); }
+  .timer-bar.warning .timer-bar-time { color: var(--tess); }
+  .timer-bar.go { border-top-color: var(--green); }
+  .timer-bar.go .timer-bar-time { color: var(--green); }
+
+  /* Next Up Preview */
+  .workout-next-preview {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .workout-next-label {
+    font-size: 11px; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .workout-next-name { font-size: 15px; font-weight: 600; color: var(--text-dim); }
+  .workout-next-detail { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+  /* Workout Bottom (chat prompt) */
+  .workout-bottom {
+    flex-shrink: 0;
+    padding: 8px 16px calc(12px + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--border);
+    background: var(--bg-deep);
+  }
+  .prompt-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 4px 4px 4px 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+  .prompt-box::before {
+    content: ''; position: absolute; inset: -1px; border-radius: 15px;
+    background: linear-gradient(135deg, var(--tess-border), transparent 40%, var(--accent-border));
+    z-index: -1; opacity: 0; transition: opacity 0.3s;
+  }
+  .prompt-box:focus-within { border-color: var(--tess-border); }
+  .prompt-box:focus-within::before { opacity: 1; }
+  .prompt-input {
+    flex: 1; background: transparent; border: none; color: var(--text);
+    font-size: 15px; font-family: inherit; outline: none;
+    padding: 10px 0; min-height: 20px;
+  }
+  .prompt-input::placeholder { color: var(--text-muted); }
+  .prompt-send {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--tess); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0; opacity: 0.4;
+  }
+  .prompt-send.ready { opacity: 1; }
+  .prompt-send:active { transform: scale(0.92); }
+  .prompt-send svg { width: 18px; height: 18px; }
+
+  /* Chat Panel (shared) */
   .chat-panel {
     max-height: 0; overflow: hidden;
     transition: max-height 0.35s ease, opacity 0.25s ease;
-    opacity: 0;
+    opacity: 0; flex-shrink: 0;
   }
-  .chat-panel.open { max-height: 50vh; opacity: 1; overflow-y: auto; }
+  .chat-panel.open { max-height: 40vh; opacity: 1; overflow-y: auto; }
   .chat-messages { padding: 12px 20px 4px; display: flex; flex-direction: column; gap: 10px; }
 
   .chat-msg {
     max-width: 85%; padding: 10px 14px; border-radius: 14px;
-    font-size: 14px; line-height: 1.45; animation: msgIn 0.25s ease;
-  }
-  @keyframes msgIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+    font-size: 14px; line-height: 1.45;
+    animation: fadeSlideIn 0.25s ease;
   }
   .chat-msg.user {
     align-self: flex-end; background: var(--accent);
@@ -276,41 +558,20 @@
     padding: 6px 12px; max-width: 95%;
   }
 
-  /* ── Prompt Box (Lovable-style) ── */
-  .prompt-area { padding: 10px 16px 14px; }
-  .prompt-box {
-    display: flex; align-items: center; gap: 8px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 4px 4px 4px 16px;
-    transition: border-color 0.3s, box-shadow 0.3s;
-    position: relative;
-  }
-  .prompt-box::before {
-    content: ''; position: absolute; inset: -1px; border-radius: 15px;
-    background: linear-gradient(135deg, var(--tess-border), transparent 40%, var(--accent-border));
-    z-index: -1; opacity: 0; transition: opacity 0.3s;
-  }
-  .prompt-box:focus-within { border-color: var(--tess-border); }
-  .prompt-box:focus-within::before { opacity: 1; }
-
-  .prompt-input {
-    flex: 1; background: transparent; border: none; color: var(--text);
-    font-size: 15px; font-family: inherit; outline: none;
-    padding: 10px 0; min-height: 20px;
-  }
-  .prompt-input::placeholder { color: var(--text-muted); }
-
-  .prompt-send {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: var(--tess); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; flex-shrink: 0; opacity: 0.4;
-  }
-  .prompt-send.ready { opacity: 1; }
-  .prompt-send:active { transform: scale(0.92); }
-  .prompt-send svg { width: 18px; height: 18px; }
-
   /* ── Toast ── */
+  /* Tess Toast */
+  .tess-toast {
+    position: fixed; top: 60px; left: 16px; right: 16px; z-index: 100;
+    background: var(--surface); border: 1px solid var(--tess-border);
+    border-radius: 12px; padding: 10px 14px;
+    font-size: 13px; color: var(--text); line-height: 1.4;
+    transform: translateY(-20px); opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    pointer-events: none;
+  }
+  .tess-toast.visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .tess-toast .tess-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--tess); margin-bottom: 2px; }
+
   .copy-toast {
     position: fixed; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0.9);
@@ -320,48 +581,117 @@
     z-index: 200; pointer-events: none;
   }
   .copy-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+
+  /* ── Animations ── */
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Legs B: Hip Hinge / Posterior Chain</h1>
-  <div class="subtitle">Saturday, March 21 — Week 2</div>
-  <div class="phase-badge">Accumulation: RPE 7-8, 10-15 reps</div>
-</header>
+<!-- ═══════════════════════════════
+     REVIEW MODE
+     ═══════════════════════════════ -->
+<div id="reviewMode">
+  <div class="review-header">
+    <h1 id="reviewTitle">Pull B: Vertical Emphasis</h1>
+    <div class="subtitle" id="reviewSubtitle">Friday, March 20 — Week 1</div>
+    <div class="phase-badge" id="reviewBadge">Accumulation: RPE 7-8, 10-15 reps</div>
+  </div>
 
-<div id="exercises"></div>
+  <button class="start-session-btn" id="startSessionBtn" onclick="enterWorkoutMode()">
+    Start Session <span class="arrow">→</span>
+  </button>
 
-<!-- Bottom Dock -->
-<div class="bottom-dock" id="bottomDock">
-  <div class="dock-handle" id="dockHandle"><div class="dock-handle-bar"></div></div>
-  <div class="timer-strip" id="timerStrip">
-    <div class="timer-icon">T</div>
-    <div class="timer-content">
-      <div class="timer-countdown" id="timerCountdown">0:00</div>
-      <div class="timer-cue" id="timerCue">Rest</div>
+  <div class="session-summary" id="sessionSummary" style="display:none;">
+    <div class="summary-stat"><div class="val" id="summaryVolume">0</div><div class="label">Volume (lb)</div></div>
+    <div class="summary-stat"><div class="val" id="summaryDuration">0:00</div><div class="label">Duration</div></div>
+    <div class="summary-stat"><div class="val" id="summarySets">0</div><div class="label">Sets</div></div>
+    <div class="summary-stat"><div class="val" id="summaryPRs">0</div><div class="label">PRs</div></div>
+  </div>
+
+  <div id="reviewExercises"></div>
+
+  <div class="review-bottom" id="reviewBottom">
+    <div class="review-bottom-inner">
+      <div class="review-progress">
+        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
+        <span class="progress-text" id="progressText">0 / 32</span>
+      </div>
+      <button class="copy-btn" onclick="copyLog()">Copy Log</button>
     </div>
-    <button class="timer-skip" onclick="resetTimer()">Skip</button>
   </div>
-  <div class="progress-strip">
-    <div class="progress-left">
-      <div class="progress-bar-track"><div class="progress-bar-fill" id="progressFill"></div></div>
-      <span class="progress-text" id="progressText">0 / 32</span>
-      <span class="progress-pct" id="progressPct"></span>
+</div>
+
+<!-- ═══════════════════════════════
+     WORKOUT MODE
+     ═══════════════════════════════ -->
+<div id="workoutMode" class="hidden">
+  <!-- Top Bar -->
+  <div class="workout-topbar">
+    <span class="exercise-count" id="workoutExCount">1 / 10</span>
+    <button class="workout-exit" onclick="exitWorkoutMode()">End</button>
+  </div>
+
+  <!-- Progress Dots -->
+  <div class="workout-dots" id="workoutDots"></div>
+
+  <!-- Exercise Content -->
+  <div class="workout-exercise" id="workoutExercise">
+    <div class="workout-exercise-name" id="workoutExName">Wide-Grip Lat Pulldown</div>
+    <div class="workout-exercise-meta" id="workoutExMeta">4 sets × 10-12 reps · 90s rest</div>
+    <div class="workout-exercise-cue" id="workoutExCue"></div>
+
+    <div class="workout-set-display" id="workoutSetDisplay">
+      <div class="workout-set-label" id="workoutSetLabel">Set 1 of 4</div>
+      <div class="workout-input-row">
+        <div class="workout-input-group">
+          <div class="workout-input-label">Weight (lb)</div>
+          <input class="workout-input" id="workoutWeight" type="text" inputmode="decimal" placeholder="—">
+        </div>
+        <div class="workout-input-group">
+          <div class="workout-input-label">Reps</div>
+          <input class="workout-input" id="workoutReps" type="text" inputmode="numeric" placeholder="—">
+        </div>
+      </div>
+
+      <!-- Swipe to confirm -->
+      <div class="swipe-track" id="swipeTrack">
+        <div class="swipe-track-fill" id="swipeFill"></div>
+        <div class="swipe-thumb" id="swipeThumb">✓</div>
+        <div class="swipe-hint" id="swipeHint">Slide to confirm</div>
+      </div>
     </div>
-    <button class="copy-btn" onclick="copyLog()">Copy Log</button>
   </div>
 
-  <div class="chat-panel" id="chatPanel">
-    <div class="chat-messages" id="chatMessages"></div>
+  <!-- Next Up Preview -->
+  <div class="workout-next-preview" id="workoutNextPreview">
+    <div class="workout-next-label">Next up</div>
+    <div class="workout-next-name" id="workoutNextName">Single-Arm Cable Row</div>
+    <div class="workout-next-detail" id="workoutNextDetail">3 × 12-15/side · 35 lb</div>
   </div>
 
-  <div class="prompt-area">
-    <div class="prompt-box" id="promptBox">
-      <input class="prompt-input" id="promptInput" type="text"
-        placeholder="Talk to Tess about your session..."
+  <!-- Compact Timer Bar -->
+  <div class="timer-bar" id="timerBar">
+    <div class="timer-bar-time" id="timerBarTime">1:30</div>
+    <div class="timer-bar-cue" id="timerBarCue">Rest up.</div>
+    <button class="timer-bar-skip" onclick="skipWorkoutTimer()">Skip</button>
+  </div>
+
+  <!-- Chat (collapsed by default in workout mode) -->
+  <div class="chat-panel" id="workoutChatPanel">
+    <div class="chat-messages" id="workoutChatMessages"></div>
+  </div>
+
+  <!-- Prompt -->
+  <div class="workout-bottom">
+    <div class="prompt-box">
+      <input class="prompt-input" id="workoutPromptInput" type="text"
+        placeholder="Talk to Tess..."
         autocomplete="off" autocorrect="on">
-      <button class="prompt-send" id="promptSend" onclick="sendMessage()">
+      <button class="prompt-send" id="workoutPromptSend" onclick="sendWorkoutMessage()">
         <svg viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <line x1="22" y1="2" x2="11" y2="13"></line>
           <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -371,80 +701,73 @@
   </div>
 </div>
 
+<!-- Chat Panel for Review Mode -->
+<div class="chat-panel" id="reviewChatPanel" style="position:fixed;bottom:60px;left:0;right:0;z-index:45;background:var(--bg-deep);">
+  <div class="chat-messages" id="reviewChatMessages"></div>
+</div>
+
+<div class="tess-toast" id="tessToast"><div class="tess-name">Tess</div><span id="tessToastText"></span></div>
 <div class="copy-toast" id="toast">Copied to clipboard</div>
 
 <script>
-// ── Exercise Data ──
-const WARMUP = [
-  { name: "Bike / Brisk Walk", sets: 1, reps: "3 min", rest: 0,
-    note: "Get blood flowing. Easy pace.",
-    prediction: "", section: "warmup",
-    cues: ["Easy pace. Not a cardio session -- just get warm."] },
-  { name: "Hip Circles", sets: 1, reps: "10/side", rest: 0,
-    note: "Both directions. Open up the hips.",
-    prediction: "", section: "warmup",
-    cues: ["Big circles. Both directions. Feel the hip capsule open up."] },
-  { name: "Leg Swings (front/back)", sets: 1, reps: "10/side", rest: 0,
-    note: "Hold something for balance. Controlled swing.",
-    prediction: "", section: "warmup",
-    cues: ["Controlled swing. Not ballistic. Feel the hamstrings stretch."] },
-  { name: "Piriformis Stretch", sets: 1, reps: "30s/side", rest: 0,
-    note: "Mandatory before lower body. Sciatica prevention.",
-    prediction: "", section: "warmup",
-    cues: ["Hold 30 seconds each side. Breathe into the stretch. Non-negotiable."] },
-  { name: "Bodyweight RDL", sets: 1, reps: "8 reps", rest: 0,
-    note: "Pattern the hinge before loading it. Slow and controlled.",
-    prediction: "", section: "warmup",
-    cues: ["Hips back, soft knees, flat back. Feel the hamstrings load."] },
-  { name: "Glute Bridges", sets: 1, reps: "10 reps", rest: 0,
-    note: "Squeeze at top. Activate glutes before the session.",
-    prediction: "", section: "warmup",
-    cues: ["Full squeeze at the top for 2 seconds. Wake the glutes up."] }
+// ══════════════════════════════
+// EXERCISE DATA
+// ══════════════════════════════
+
+const PULL_B = [
+  { name: "Wide-Grip Lat Pulldown", sets: 4, reps: "10-12", rest: 90,
+    note: "Lead with the vertical pull. Full stretch at top, drive elbows down.",
+    prediction: "120 lb (from Pull A)", section: "pull",
+    cues: ["Think about pulling your elbows into your back pockets.", "Lean back just slightly -- not a full row.", "Full stretch at the top. Let the lats lengthen before you pull again.", "Drive elbows down and back. Hands are hooks."] },
+  { name: "Single-Arm Cable Row", sets: 3, reps: "12-15/side", rest: 60,
+    note: "Rotate slightly at peak for full lat engagement. Hip-height cable.",
+    prediction: "35 lb (est. from cable row)", section: "pull",
+    cues: ["Small rotation at peak contraction -- let the lat fully shorten.", "Hip-height cable. Pull to your hip, not your chest.", "Control the eccentric. Feel the stretch across your back."] },
+  { name: "Chest-Supported DB Row", sets: 3, reps: "10-12", rest: 75,
+    note: "Lower volume than Pull A. Focus on squeeze and stretch. Sciatica-friendly.",
+    prediction: "140 lb (from Pull A)", section: "pull",
+    cues: ["Full stretch at the bottom -- let the DBs hang.", "Drive elbows back, squeeze shoulder blades together at top.", "Chest stays on the pad. Zero momentum."] },
+  { name: "Face Pull (rope, high pulley)", sets: 4, reps: "15-20", rest: 45,
+    note: "External rotation throughout. Non-negotiable for shoulder longevity.",
+    prediction: "25 lb (est.)", section: "pull",
+    cues: ["External rotation the whole time -- thumbs back, pinkies forward.", "This is shoulder insurance. Every rep counts.", "Pull to your face, not your chest. Elbows high.", "Light weight, perfect form. This is not a strength exercise."] },
+  { name: "Incline DB Curl (45-degree)", sets: 3, reps: "10-12", rest: 60,
+    note: "Lengthened bicep position. Full hang at bottom, zero momentum. Go lighter than expected.",
+    prediction: "20 lb (est. start light)", section: "pull",
+    cues: ["Let your arms hang completely at the bottom. Feel that stretch.", "Zero momentum. If you're swinging, drop the weight.", "The stretch at the bottom IS the stimulus. Don't cheat it."] },
+  { name: "EZ Bar Curl", sets: 3, reps: "10-12", rest: 60,
+    note: "Heavier curl variation. Strict form, no swing.",
+    prediction: "55 lb (est.)", section: "pull",
+    cues: ["Elbows pinned to your sides. Only forearms move.", "Squeeze at the top for a full second.", "Strict form. If the weight is too heavy to control, drop it."] }
 ];
 
-const LEGS_B = [
-  { name: "Romanian Deadlift (RDL)", sets: 4, reps: "10-12", rest: 90,
-    note: "The main lift. Hinge pattern. Establish baseline weight today.",
-    prediction: "", section: "legs",
-    cues: ["Hips back, soft knees. The bar stays close to your legs.", "Feel the hamstrings load on the way down. Don't round your back.", "Drive hips forward at the top. Squeeze glutes.", "Controlled eccentric -- 2-3 seconds down. This is where growth happens."] },
-  { name: "Lying Leg Curl", sets: 4, reps: "10-12", rest: 75,
-    note: "Isolate the hamstrings. Full ROM. Control the eccentric.",
-    prediction: "", section: "legs",
-    cues: ["Full range of motion. Let it stretch at the bottom.", "Squeeze at the top for a second. Feel the hamstring contract.", "Control the negative. Don't let gravity do the work.", "Toes pointed slightly in targets the inner hamstring."] },
-  { name: "Hip Thrust (barbell or machine)", sets: 4, reps: "10-15", rest: 90,
-    note: "Glute builder. Full lockout at top. Chin tucked, eyes forward.",
-    prediction: "", section: "legs",
-    cues: ["Drive through your heels. Full hip extension at the top.", "Chin tucked, eyes forward -- not up at the ceiling.", "Pause at the top for a full second. Squeeze hard.", "If barbell, pad the bar. Comfort matters for heavy sets."] },
-  { name: "45-Degree Back Extension", sets: 3, reps: "10-15", rest: 90,
-    note: "Bodyweight only today. Learn the pattern. Squeeze glutes at top.",
-    prediction: "BW", section: "legs",
-    cues: ["Bodyweight only. Pattern first, load later.", "Hinge at the hips, not the lower back.", "Squeeze glutes at the top. This is a glute/ham exercise, not a back exercise."] },
-  { name: "Glute-Ham Raise", sets: 3, reps: "8-10", rest: 90,
-    note: "Bodyweight or eccentric only if needed. Brutal but effective.",
-    prediction: "BW", section: "legs",
-    cues: ["If you can't do full reps, do slow eccentrics -- 5 seconds down.", "Keep your hips extended the whole time. Don't pike.", "This is hard. Even partial reps are valuable here."] },
-  { name: "Adductor Machine", sets: 3, reps: "15-20", rest: 60,
-    note: "Higher reps. Full squeeze at peak contraction. Establish baseline.",
-    prediction: "", section: "legs",
-    cues: ["Full squeeze at the end of each rep. Hold for a second.", "Control the eccentric. Don't let the weight slam back.", "Higher reps here. Feel the burn. This is supposed to be uncomfortable."] }
+const PUSH_B_FINISH = [
+  { name: "Seated DB Overhead Press (neutral grip)", sets: 3, reps: "10-12", rest: 90,
+    note: "Shoulder-friendly pressing. Controlled eccentric. Picking up from yesterday.",
+    prediction: "60 lb (from 3/13)", section: "push",
+    cues: ["Neutral grip protects your shoulders. Keep those palms facing each other.", "Controlled eccentric -- 2 seconds down.", "Full lockout at the top. Press through the ceiling."] },
+  { name: "Behind-Body Cable Lateral Raise", sets: 3, reps: "15-20", rest: 45,
+    note: "Humiston technique. Cable runs behind body, isolates medial delt. No swing.",
+    prediction: "10 lb (est. start light)", section: "push",
+    cues: ["Cable behind your body. Slight lean forward.", "Raise to shoulder height -- no higher. Control it.", "No swinging. If you can't control it, drop the weight."] },
+  { name: "Cable Overhead Tricep Extension (rope)", sets: 3, reps: "12-15", rest: 60,
+    note: "Lengthened position for long head. Squeeze at full extension.",
+    prediction: "35 lb (est.)", section: "push",
+    cues: ["Elbows stay pointed at the ceiling.", "Full extension. Squeeze the tricep at the bottom.", "The stretch at the top is where the long head grows."] },
+  { name: "Dip Machine or Close-Grip Pushdown", sets: 3, reps: "10-12", rest: 60,
+    note: "Second tricep movement. Different stimulus from overhead extension.",
+    prediction: "80 lb (est.)", section: "push",
+    cues: ["Full lockout at the bottom of each rep.", "Elbows pinned. This is a tricep exercise, not a chest exercise.", "Control the negative. Time under tension matters here."] }
 ];
 
-const BONUS_ARMS = [
-  { name: "EZ Bar Curl or DB Curl", sets: 3, reps: "12-15", rest: 60,
-    note: "Bonus if you have time. Strict form, no swing.",
-    prediction: "", section: "bonus",
-    cues: ["Elbows pinned. Only forearms move.", "Squeeze at the top for a full second.", "If you're swinging, the weight is too heavy."] },
-  { name: "Tricep Rope Pushdown", sets: 3, reps: "12-15", rest: 60,
-    note: "Bonus if you have time. Full extension, squeeze at bottom.",
-    prediction: "", section: "bonus",
-    cues: ["Split the rope at the bottom. Full extension.", "Elbows stay pinned to your sides.", "Control the negative. Don't let it fly back up."] }
-];
-
-const EXERCISES = [...WARMUP, ...LEGS_B, ...BONUS_ARMS];
+const EXERCISES = [...PULL_B, ...PUSH_B_FINISH];
 const TOTAL_SETS = EXERCISES.reduce((s, e) => s + e.sets, 0);
 
-// ── Periodization ──
-const CURRENT_WEEK = 2;
+// ══════════════════════════════
+// PERIODIZATION
+// ══════════════════════════════
+
+const CURRENT_WEEK = 1;
 const PHASE_TARGETS = {
   1: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
   2: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
@@ -455,7 +778,11 @@ const PHASE_TARGETS = {
 };
 const TARGET = PHASE_TARGETS[CURRENT_WEEK];
 
-// ── State ──
+// ══════════════════════════════
+// STATE
+// ══════════════════════════════
+
+let mode = 'review'; // 'review' | 'workout'
 let completedSets = 0;
 let timerInterval = null;
 let timerSeconds = 0;
@@ -463,13 +790,22 @@ let currentExercise = 0;
 let currentSet = 0;
 let chatOpen = false;
 let sessionLog = []; // {ei, si, weight, reps, rpe}
-let pendingRpe = null; // {ei, si} -- waiting for RPE input
+let pendingRpe = null;
+let sessionStartTime = null;
+let workoutTimerActive = false;
+let swipeState = { active: false, startX: 0, trackWidth: 0 };
 
-// ── Tess Coaching Engine ──
+// Per-exercise set tracking: which sets are done in workout mode
+let exerciseSetsDone = EXERCISES.map(ex => Array(ex.sets).fill(false));
+
+// ══════════════════════════════
+// TESS COACHING ENGINE
+// ══════════════════════════════
+
 const TESS = {
   greetings: [
-    "Legs B. Posterior chain day -- RDLs are the star. Warm up is built in. Bonus arms at the end if you have gas left. Let's build.",
-    "Saturday session. Hip hinge focus plus some arm work if time allows. Warm up first, no shortcuts."
+    "Pull B day. Vertical emphasis -- lats are the star. You've got the Push B finish tacked on at the end for shoulders and triceps. Let's build.",
+    "Good morning. Big pull session plus the shoulders and tri work from yesterday. I'll be here between sets."
   ],
 
   getContext() {
@@ -484,7 +820,6 @@ const TESS = {
     const msg = input.toLowerCase().trim();
     const ctx = this.getContext();
 
-    // RPE / difficulty check-ins
     if (msg.match(/rpe\s*(\d+)/)) {
       const rpe = parseInt(msg.match(/rpe\s*(\d+)/)[1]);
       if (rpe >= 9) return `RPE ${rpe} on set ${ctx.done.length} of ${ctx.ex.name}. That's at the ceiling for Week 1. If the next set feels like a grind, drop 5-10%. We're building baselines, not testing maxes.`;
@@ -492,34 +827,29 @@ const TESS = {
       if (rpe < 7) return `RPE ${rpe}? You've got room. Consider adding 5 lbs next set. We want RPE 7-8 for this phase.`;
     }
 
-    // "heavy" / "hard" / "struggle"
     if (msg.match(/heavy|hard|struggle|tough|grinding|brutal|dying/)) {
       if (ctx.done.length >= 2) {
-        return `You're ${ctx.done.length} sets deep on ${ctx.ex.name}. If reps are dropping below the target range, drop 10% and finish clean. Quality reps over ego weight. Week 1 is about establishing what's real.`;
+        return `You're ${ctx.done.length} sets deep on ${ctx.ex.name}. If reps are dropping below the target range, drop 10% and finish clean. Quality reps over ego weight.`;
       }
-      return `Noted. If you're grinding early, the weight might be too ambitious for accumulation. Drop 5 lbs and own the full rep range. We build from honest baselines.`;
+      return `Noted. If you're grinding early, the weight might be too ambitious for accumulation. Drop 5 lbs and own the full rep range.`;
     }
 
-    // "easy" / "light"
     if (msg.match(/easy|light|too light|cake|cruise/)) {
-      return `Good to know. Add 5 lbs next set and see where RPE lands. We want 7-8 for this phase -- not coasting, not grinding.`;
+      return `Good to know. Add 5 lbs next set and see where RPE lands. We want 7-8 for this phase.`;
     }
 
-    // Form / technique questions
     if (msg.match(/form|technique|doing.*(right|wrong|correct)|how.*(should|do)/)) {
       const cue = ctx.ex.cues[Math.min(ctx.done.length, ctx.ex.cues.length - 1)];
       return cue;
     }
 
-    // Pain / discomfort
     if (msg.match(/pain|hurt|sharp|twinge|ache|sore|tight/)) {
-      if (msg.match(/shoulder/)) return "Stop the set. If it's a sharp pain, we're done with that exercise. Swap to a pain-free variation. If it's tightness, do 10 band pull-aparts and reassess. Your shoulders have to last longer than this workout.";
-      if (msg.match(/back|sciatica|spine/)) return "If it's sciatica flaring, switch to chest-supported variations only. No standing rows, no deadlift patterns. Do some cat-cows and hip circles before the next set. If it's sharp, we stop lower body loading entirely.";
-      if (msg.match(/achilles|calf|ankle/)) return "Achilles is non-negotiable. Ice after the session. If it's reactive during the movement, stop that exercise. We replace, we don't push through tendon issues.";
-      return "Where exactly? If it's joint pain or sharp, stop and we modify. If it's muscle soreness or tightness, work through it with controlled reps and a proper warmup set.";
+      if (msg.match(/shoulder/)) return "Stop the set. If it's a sharp pain, we're done with that exercise. Swap to a pain-free variation. If it's tightness, do 10 band pull-aparts and reassess.";
+      if (msg.match(/back|sciatica|spine/)) return "If it's sciatica flaring, switch to chest-supported variations only. No standing rows, no deadlift patterns. Do some cat-cows and hip circles.";
+      if (msg.match(/achilles|calf|ankle/)) return "Achilles is non-negotiable. Ice after the session. If it's reactive during the movement, stop that exercise.";
+      return "Where exactly? If it's joint pain or sharp, stop and we modify. If it's muscle soreness, work through it with controlled reps.";
     }
 
-    // Weight decisions
     if (msg.match(/go up|add weight|increase|more weight|bump/)) {
       if (ctx.done.length > 0) {
         const lastReps = parseInt(ctx.done[ctx.done.length - 1].reps);
@@ -527,113 +857,125 @@ const TESS = {
         if (lastReps >= repTarget) return `You hit the top of the range last set. Add 5 lbs. If reps drop below ${ctx.ex.reps.split('-')[0]}, come back down next session.`;
         return `You're not hitting the top of the rep range yet. Stay at this weight until you own all sets at ${ctx.ex.reps}. Then we go up.`;
       }
-      return "First establish your working weight at the top of the rep range across all sets. Then we add. Patience builds the base.";
+      return "First establish your working weight at the top of the rep range across all sets. Then we add.";
     }
 
-    // "what's next" / "next exercise"
     if (msg.match(/what.*(next|now)|next.*(exercise|up)|move on|done with/)) {
       if (currentExercise < EXERCISES.length - 1) {
         const next = EXERCISES[currentExercise + 1];
-        return `Next up: ${next.name}. ${next.sets} sets of ${next.reps}. ${next.prediction ? 'Predicted: ' + next.prediction + '.' : 'No baseline yet -- start conservative and find your working weight.'} ${next.cues[0]}`;
+        return `Next up: ${next.name}. ${next.sets} sets of ${next.reps}. ${next.prediction ? 'Predicted: ' + next.prediction + '.' : ''} ${next.cues[0]}`;
       }
       return "That's the last exercise. Finish these sets strong and we'll wrap it up.";
     }
 
-    // Fatigue / energy
     if (msg.match(/tired|fatigue|gassed|low energy|dragging|flat/)) {
       const pct = Math.round((completedSets / TOTAL_SETS) * 100);
-      if (pct > 70) return `You're ${pct}% through. The finish line is close. Drop to the low end of the rep range if you need to, but finish every exercise. The last 30% is where discipline separates you.`;
-      if (pct > 40) return `Halfway point fatigue is normal. Make sure you're hydrated. If you need an extra 30 seconds rest between sets, take it. Better to recover and hit quality reps than rush through garbage.`;
-      return "If you're flat early, consider whether sleep or nutrition is the issue. For today: dial RPE back to 7, focus on technique, and get through the session. A completed workout at RPE 7 beats a half-finished one at RPE 9.";
+      if (pct > 70) return `You're ${pct}% through. The finish line is close. Drop to the low end of the rep range if you need to, but finish every exercise.`;
+      if (pct > 40) return `Halfway fatigue is normal. Hydrate. Take an extra 30 seconds rest if you need it. Quality reps over rushed garbage.`;
+      return "If you're flat early, dial RPE back to 7, focus on technique, and get through the session. A completed workout at RPE 7 beats a half-finished one at RPE 9.";
     }
 
-    // How am I doing / progress
     if (msg.match(/how.*(doing|going|look)|progress|status/)) {
       const pct = Math.round((completedSets / TOTAL_SETS) * 100);
       const remaining = TOTAL_SETS - completedSets;
-      if (pct === 0) return "Just getting started. 32 sets ahead of you. Focus on the first exercise and let the session build.";
-      if (pct < 30) return `${completedSets} sets down, ${remaining} to go. Still warming into the session. Building the foundation.`;
-      if (pct < 60) return `${pct}% through. ${remaining} sets left. You're in the thick of it. Keep the quality high.`;
-      if (pct < 90) return `${pct}% done. ${remaining} sets to close it out. You're in the home stretch. Don't coast -- finish each set like it matters.`;
-      return `${pct}% done. Almost there. Finish strong. Every rep counts in the last few sets.`;
+      if (pct === 0) return `${TOTAL_SETS} sets ahead. Focus on the first exercise and let the session build.`;
+      if (pct < 50) return `${completedSets} sets down, ${remaining} to go. Building the foundation.`;
+      if (pct < 90) return `${pct}% done. ${remaining} sets to close it out. Don't coast.`;
+      return `${pct}% done. Almost there. Finish strong.`;
     }
 
-    // Motivation
     if (msg.match(/let.*(go|do)|ready|here we go|send it/)) {
       const phrases = [
-        "Let's go. Controlled reps, full ROM, no wasted sets.",
-        "Focus in. This set, this rep. Nothing else matters right now.",
+        "Let's go. Controlled reps, full ROM.",
+        "Focus in. This set, this rep.",
         "You're here. The hard part was showing up. Now execute.",
       ];
       return phrases[Math.floor(Math.random() * phrases.length)];
     }
 
-    // Skip / swap exercise
     if (msg.match(/skip|swap|replace|substitute|different/)) {
-      return `What do you want to swap out and why? If it's pain, we modify immediately. If it's equipment availability, tell me what you have access to and I'll pick the best alternative.`;
+      return `What do you want to swap out and why? If it's pain, we modify immediately. If it's equipment, tell me what you have access to.`;
     }
 
-    // Rest time
     if (msg.match(/rest|how long|timer|break/)) {
-      return `Prescribed rest for ${ctx.ex.name} is ${ctx.ex.rest} seconds. If you're still breathing hard at the end, add 15-30 seconds. Recovery between sets matters more than rushing through.`;
+      return `Prescribed rest for ${ctx.ex.name} is ${ctx.ex.rest} seconds. If you're still breathing hard, add 15-30 seconds.`;
     }
 
-    // General / catch-all with contextual awareness
     if (ctx.done.length > 0) {
       const lastWeight = ctx.done[ctx.done.length - 1].weight;
       const lastReps = ctx.done[ctx.done.length - 1].reps;
-      return `Got it. You're on ${ctx.ex.name}, ${ctx.done.length} of ${ctx.ex.sets} sets done. Last set was ${lastWeight} lb x ${lastReps}. ${ctx.ex.cues[Math.min(ctx.done.length, ctx.ex.cues.length - 1)]}`;
+      return `You're on ${ctx.ex.name}, ${ctx.done.length} of ${ctx.ex.sets} sets done. Last set: ${lastWeight} lb x ${lastReps}. ${ctx.ex.cues[Math.min(ctx.done.length, ctx.ex.cues.length - 1)]}`;
     }
 
-    // Default contextual response
-    const cue = ctx.ex.cues[0];
-    return `You're on ${ctx.ex.name} (${ctx.ex.sets}x${ctx.ex.reps}). ${cue}`;
+    return `You're on ${ctx.ex.name} (${ctx.ex.sets}x${ctx.ex.reps}). ${ctx.ex.cues[0]}`;
   }
 };
 
-// ── Render ──
-function renderExercises() {
-  const container = document.getElementById('exercises');
+const REST_CUES = {
+  start: ["Rest up. Shake it out.", "Breathe. Reset your grip.", "Good set. Let your muscles recover."],
+  halfway: ["Halfway. Start thinking about the next set.", "Half rest done. Visualize the next set."],
+  soon: ["Almost time. Get set up.", "10 seconds. Get your grip ready.", "Coming up. Deep breath."],
+  go: ["Go. You're ready.", "Time. Next set.", "Let's go. Execute."]
+};
+
+function pickCue(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+// ══════════════════════════════
+// REVIEW MODE RENDERING
+// ══════════════════════════════
+
+function renderReviewExercises() {
+  const container = document.getElementById('reviewExercises');
   let html = '';
   let lastSection = null;
 
   EXERCISES.forEach((ex, ei) => {
     if (ex.section !== lastSection) {
-      if (ex.section === 'warmup') {
-        html += `<div class="section-divider"><span class="label">Warm-Up</span><span class="desc">5-7 minutes</span></div>`;
-      } else if (ex.section === 'legs') {
-        html += `<div class="section-divider"><span class="label">Legs B</span><span class="desc">Hip Hinge / Posterior Chain</span></div>`;
-      } else if (ex.section === 'bonus') {
-        html += `<div class="section-divider"><span class="label">Bonus</span><span class="desc">Biceps + Triceps (if time)</span></div>`;
+      if (ex.section === 'pull') {
+        html += `<div class="section-divider"><span class="label">Pull B</span><span class="desc">Vertical Emphasis</span></div>`;
+      } else if (ex.section === 'push') {
+        html += `<div class="section-divider"><span class="label">Push B Finish</span><span class="desc">Shoulders + Triceps from yesterday</span></div>`;
       }
       lastSection = ex.section;
     }
 
-    // Extract predicted weight number if available
     const predWeight = ex.prediction ? ex.prediction.match(/^(\d+)/)?.[1] || '' : '';
+    const setsHTML = Array.from({length: ex.sets}, (_, si) => {
+      const logEntry = sessionLog.find(l => l.ei === ei && l.si === si);
+      const isDone = logEntry !== undefined;
+      return `
+        <div class="review-set-row" data-ex="${ei}" data-set="${si}">
+          <div class="set-label">${si + 1}</div>
+          <input class="review-input${predWeight && !isDone ? ' predicted' : ''}${isDone ? ' logged' : ''}" type="text" inputmode="decimal"
+            placeholder="lbs" data-field="weight" data-ex="${ei}" data-set="${si}"
+            value="${isDone ? logEntry.weight : predWeight}" ${isDone ? 'readonly' : ''}>
+          <input class="review-input${isDone ? ' logged' : ''}" type="text" inputmode="numeric"
+            placeholder="reps" data-field="reps" data-ex="${ei}" data-set="${si}"
+            value="${isDone ? logEntry.reps : ''}" ${isDone ? 'readonly' : ''}>
+          <button class="review-check${isDone ? ' done' : ''}" onclick="reviewLogSet(${ei}, ${si}, this)" data-ex="${ei}" data-set="${si}">&#10003;</button>
+        </div>
+      `;
+    }).join('');
 
-    const setsHTML = Array.from({length: ex.sets}, (_, si) => `
-      <div class="set-row" data-ex="${ei}" data-set="${si}">
-        <div class="set-label">${si + 1}</div>
-        <input class="set-input${predWeight ? ' predicted' : ''}" type="text" inputmode="decimal" placeholder="lbs" data-field="weight" data-ex="${ei}" data-set="${si}" ${predWeight ? `value="${predWeight}"` : ''}>
-        <input class="set-input" type="text" inputmode="numeric" placeholder="reps" data-field="reps" data-ex="${ei}" data-set="${si}">
-        <button class="set-check" onclick="logSet(${ei}, ${si}, this)" data-ex="${ei}" data-set="${si}">&#10003;</button>
-      </div>
-    `).join('');
+    const allDone = exerciseSetsDone[ei].every(Boolean);
+    const isActive = ei === findActiveExercise();
 
     html += `
-      <div class="exercise-card ${ei === 0 ? 'active-exercise' : ''}" id="card-${ei}">
-        <div class="exercise-header">
-          <div class="exercise-num">${ei + 1}</div>
-          <div class="exercise-name">${ex.name}</div>
-          <div class="exercise-meta">${ex.sets}x${ex.reps} / ${ex.rest}s</div>
+      <div class="review-card${allDone ? ' complete' : ''}${isActive ? ' active-card expanded' : ''}" id="review-card-${ei}" data-ei="${ei}">
+        <div class="review-card-header" onclick="toggleReviewCard(${ei})">
+          <div class="review-card-num">${allDone ? '&#10003;' : (ei + 1)}</div>
+          <div class="review-card-name">${ex.name}</div>
+          <div class="review-card-meta">${ex.sets}x${ex.reps} / ${ex.rest}s</div>
+          <div class="review-card-chevron">&#9660;</div>
         </div>
-        <div class="exercise-note">${ex.note}</div>
-        <div class="sets-grid">
-          <div class="set-row header">
-            <span>Set</span><span>Weight</span><span>Reps</span><span></span>
+        <div class="review-card-body">
+          <div class="review-card-note">${ex.note}</div>
+          <div class="review-sets">
+            <div class="review-set-row header">
+              <span>Set</span><span>Weight</span><span>Reps</span><span></span>
+            </div>
+            ${setsHTML}
           </div>
-          ${setsHTML}
         </div>
       </div>
     `;
@@ -642,11 +984,17 @@ function renderExercises() {
   container.innerHTML = html;
 }
 
-// ── Set Logging ──
-function logSet(ei, si, btn) {
+function findActiveExercise() {
+  for (let i = 0; i < EXERCISES.length; i++) {
+    if (!exerciseSetsDone[i].every(Boolean)) return i;
+  }
+  return EXERCISES.length - 1;
+}
+
+function reviewLogSet(ei, si, btn) {
   if (btn.classList.contains('done')) return;
 
-  const row = btn.closest('.set-row');
+  const row = btn.closest('.review-set-row');
   const weightInput = row.querySelector('[data-field="weight"]');
   const repsInput = row.querySelector('[data-field="reps"]');
 
@@ -661,45 +1009,24 @@ function logSet(ei, si, btn) {
   weightInput.readOnly = true;
   repsInput.readOnly = true;
 
-  // Track state
   currentExercise = ei;
   currentSet = si;
+  exerciseSetsDone[ei][si] = true;
   sessionLog.push({ ei, si, weight: weightInput.value, reps: repsInput.value, rpe: null });
   completedSets++;
+  if (!sessionStartTime) sessionStartTime = Date.now();
   updateProgress();
-  startTimer(EXERCISES[ei].rest, EXERCISES[ei].name);
+  updateSessionSummary();
 
-  // Show RPE picker inline
+  // RPE picker
   pendingRpe = { ei, si, logIndex: sessionLog.length - 1 };
-  showRpePicker(row, ei, si);
+  showReviewRpePicker(row, ei, si);
 
-  // Update active exercise highlight
-  document.querySelectorAll('.exercise-card').forEach(c => c.classList.remove('active-exercise'));
-  const card = document.getElementById(`card-${ei}`);
-  const allChecks = card.querySelectorAll('.set-check');
-  const allDone = [...allChecks].every(c => c.classList.contains('done'));
+  // Update card states
+  renderReviewCardStates();
 
-  if (allDone) {
-    card.classList.add('complete');
-    card.classList.remove('active-exercise');
-    if (ei < EXERCISES.length - 1) {
-      document.getElementById(`card-${ei + 1}`).classList.add('active-exercise');
-      const next = EXERCISES[ei + 1];
-      const isNewSection = EXERCISES[ei].section !== next.section;
-      if (isNewSection) {
-        let sectionMsg = '';
-        if (next.section === 'legs') sectionMsg = 'Warm-up done. Time to work.';
-        else if (next.section === 'bonus') sectionMsg = 'Main work done. Bonus arms if you have the gas.';
-        addTessMessage(`${sectionMsg} Next: ${next.name}. ${next.sets}x${next.reps}. ${next.cues[0]}`);
-      }
-    } else {
-      addTessMessage("That's the last exercise. Session complete. Copy your log and let's get out of here. Good work today.");
-    }
-  } else {
-    card.classList.add('active-exercise');
-  }
-
-  // Auto-fill weight for next set
+  // Auto-fill next set weight
+  const card = document.getElementById(`review-card-${ei}`);
   if (si < EXERCISES[ei].sets - 1) {
     const nextWeight = card.querySelector(`[data-field="weight"][data-set="${si + 1}"]`);
     if (nextWeight && !nextWeight.value) {
@@ -708,9 +1035,8 @@ function logSet(ei, si, btn) {
   }
 }
 
-function showRpePicker(afterRow, ei, si) {
-  // Remove any existing picker
-  document.querySelectorAll('.rpe-row, .rpe-hint').forEach(el => el.remove());
+function showReviewRpePicker(afterRow, ei, si) {
+  document.querySelectorAll('#reviewExercises .rpe-row, #reviewExercises .rpe-hint').forEach(el => el.remove());
 
   const rpeRow = document.createElement('div');
   rpeRow.className = 'rpe-row';
@@ -728,51 +1054,20 @@ function showRpePicker(afterRow, ei, si) {
   afterRow.after(hint);
   afterRow.after(rpeRow);
 
-  // Attach click handlers
   rpeRow.querySelectorAll('.rpe-pill').forEach(pill => {
-    pill.addEventListener('click', () => selectRpe(pill, ei, si));
+    pill.addEventListener('click', () => selectReviewRpe(pill, ei, si));
   });
 }
 
-function selectRpe(pill, ei, si) {
+function selectReviewRpe(pill, ei, si) {
   const rpe = parseInt(pill.dataset.rpe);
-
-  // Visual selection
   pill.closest('.rpe-pills').querySelectorAll('.rpe-pill').forEach(p => p.classList.remove('selected'));
   pill.classList.add('selected');
 
-  // Store RPE
   if (pendingRpe && pendingRpe.logIndex !== undefined) {
     sessionLog[pendingRpe.logIndex].rpe = rpe;
   }
 
-  // Tess reacts to RPE vs target
-  const inRange = rpe >= TARGET.rpe[0] && rpe <= TARGET.rpe[1];
-  const tooHard = rpe > TARGET.rpe[1];
-  const tooEasy = rpe < TARGET.rpe[0];
-  const ex = EXERCISES[ei];
-  const setNum = si + 1;
-  const setsLeft = ex.sets - setNum;
-
-  let response;
-  if (tooHard && rpe >= 10) {
-    response = `RPE 10 on set ${setNum}. That's failure -- not the plan for ${TARGET.label} phase. Drop 10% next set. We need ${setsLeft > 0 ? setsLeft + ' more sets' : 'to finish'} with quality reps, not grinding.`;
-  } else if (tooHard) {
-    response = `RPE ${rpe}. Running hotter than the ${TARGET.label} target of ${TARGET.rpe[0]}-${TARGET.rpe[1]}.${setsLeft > 0 ? ` Drop 5 lbs for the remaining ${setsLeft} set${setsLeft > 1 ? 's' : ''}. We\'re building the base -- save the heavy singles for Week 5.` : ' Note that for next session.'}`;
-  } else if (tooEasy) {
-    response = `RPE ${rpe}. You've got more in the tank than the target calls for.${setsLeft > 0 ? ` Add 5 lbs next set and see if you land in the ${TARGET.rpe[0]}-${TARGET.rpe[1]} range.` : ' Bump the weight next session.'}`;
-  } else {
-    const phrases = [
-      `RPE ${rpe}. Right where we want it for ${TARGET.label}. ${TARGET.desc}. Keep this weight.`,
-      `RPE ${rpe}. Dialed in. That's the zone for Week ${CURRENT_WEEK}.${setsLeft > 0 ? ` ${setsLeft} set${setsLeft > 1 ? 's' : ''} to go at this weight.` : ''}`,
-      `RPE ${rpe}. Perfect. This is what accumulation should feel like -- controlled, productive, sustainable.`
-    ];
-    response = phrases[Math.floor(Math.random() * phrases.length)];
-  }
-
-  addTessMessage(response);
-
-  // Fade out picker after selection
   setTimeout(() => {
     const row = pill.closest('.rpe-row');
     const hint = row.nextElementSibling;
@@ -784,192 +1079,617 @@ function selectRpe(pill, ei, si) {
   pendingRpe = null;
 }
 
-// ── Progress ──
-function updateProgress() {
-  const pct = Math.round((completedSets / TOTAL_SETS) * 100);
-  document.getElementById('progressText').textContent = `${completedSets} / ${TOTAL_SETS}`;
-  document.getElementById('progressPct').textContent = pct > 0 ? `${pct}%` : '';
-  document.getElementById('progressFill').style.width = `${pct}%`;
+function renderReviewCardStates() {
+  EXERCISES.forEach((ex, ei) => {
+    const card = document.getElementById(`review-card-${ei}`);
+    if (!card) return;
+    const allDone = exerciseSetsDone[ei].every(Boolean);
+    const isActive = ei === findActiveExercise();
+    card.classList.toggle('complete', allDone);
+    card.classList.toggle('active-card', isActive && !allDone);
+  });
 }
 
-// ── Timer ──
-const REST_CUES = {
-  start: [
-    "Rest up. Shake it out.",
-    "Breathe. Reset your grip.",
-    "Good set. Let your muscles recover.",
-    "Rest. Stay focused on the next one.",
-  ],
-  halfway: [
-    "Halfway. Start thinking about the next set.",
-    "Half rest done. Visualize the next set.",
-    "Midpoint. How did that feel?",
-  ],
-  soon: [
-    "Almost time. Get set up.",
-    "10 seconds. Get your grip ready.",
-    "Coming up. Deep breath.",
-  ],
-  go: [
-    "Go. You're ready.",
-    "Time. Next set.",
-    "Let's go. Execute.",
-  ]
-};
+function toggleReviewCard(ei) {
+  const card = document.getElementById(`review-card-${ei}`);
+  if (!card) return;
+  const wasExpanded = card.classList.contains('expanded');
+  // Collapse all cards (accordion)
+  document.querySelectorAll('.review-card.expanded').forEach(c => c.classList.remove('expanded'));
+  // If it was collapsed, expand it
+  if (!wasExpanded) {
+    card.classList.add('expanded');
+    // Scroll into view
+    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  }
+}
 
-function pickCue(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function scrollToActiveCard() {
+  const activeEi = findActiveExercise();
+  const card = document.getElementById(`review-card-${activeEi}`);
+  if (card) {
+    setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+  }
+}
 
-function startTimer(seconds, exerciseName) {
+// ══════════════════════════════
+// WORKOUT MODE
+// ══════════════════════════════
+
+function enterWorkoutMode() {
+  mode = 'workout';
+  if (!sessionStartTime) sessionStartTime = Date.now();
+
+  document.getElementById('reviewMode').classList.add('hidden');
+  document.getElementById('workoutMode').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+
+  // Find first incomplete exercise/set
+  findNextWorkoutSet();
+  renderWorkoutExercise();
+  renderWorkoutDots();
+
+  // Welcome message
+  if (sessionLog.length === 0) {
+    setTimeout(() => {
+      addWorkoutTessMessage(TESS.greetings[Math.floor(Math.random() * TESS.greetings.length)]);
+    }, 500);
+  }
+}
+
+function exitWorkoutMode() {
+  mode = 'review';
+  document.getElementById('workoutMode').classList.add('hidden');
+  document.getElementById('reviewMode').classList.remove('hidden');
+
+  // Refresh review cards with latest data
+  renderReviewExercises();
+  updateSessionSummary();
+  updateProgress();
+
+  // Show summary if any sets done
+  if (completedSets > 0) {
+    document.getElementById('sessionSummary').style.display = 'flex';
+    document.getElementById('startSessionBtn').textContent = 'Resume Session →';
+  }
+}
+
+function findNextWorkoutSet() {
+  for (let ei = 0; ei < EXERCISES.length; ei++) {
+    for (let si = 0; si < EXERCISES[ei].sets; si++) {
+      if (!exerciseSetsDone[ei][si]) {
+        currentExercise = ei;
+        currentSet = si;
+        return;
+      }
+    }
+  }
+  // All done
+  currentExercise = EXERCISES.length - 1;
+  currentSet = EXERCISES[currentExercise].sets - 1;
+}
+
+function renderWorkoutExercise() {
+  const ex = EXERCISES[currentExercise];
+  const setsDone = exerciseSetsDone[currentExercise].filter(Boolean).length;
+
+  // Top bar
+  document.getElementById('workoutExCount').textContent = `${currentExercise + 1} / ${EXERCISES.length}`;
+
+  // Exercise info
+  document.getElementById('workoutExName').textContent = ex.name;
+  document.getElementById('workoutExMeta').textContent = `${ex.sets} sets × ${ex.reps} reps · ${ex.rest}s rest`;
+
+  // Coaching cue
+  const cueIndex = Math.min(setsDone, ex.cues.length - 1);
+  document.getElementById('workoutExCue').textContent = ex.cues[cueIndex];
+
+  // Set display
+  const isSetDone = exerciseSetsDone[currentExercise][currentSet];
+  document.getElementById('workoutSetLabel').textContent = `Set ${currentSet + 1} of ${ex.sets}`;
+
+  // Ensure exercise content visible and timer bar dismissed
+  document.getElementById('workoutExercise').style.display = 'flex';
+  document.getElementById('timerBar').className = 'timer-bar';
+  workoutTimerActive = false;
+
+  // Inputs
+  const weightInput = document.getElementById('workoutWeight');
+  const repsInput = document.getElementById('workoutReps');
+
+  if (isSetDone) {
+    const logEntry = sessionLog.find(l => l.ei === currentExercise && l.si === currentSet);
+    if (logEntry) {
+      weightInput.value = logEntry.weight;
+      repsInput.value = logEntry.reps;
+    }
+    // Show done badge instead of swipe
+    document.getElementById('workoutSetDisplay').innerHTML = `
+      <div class="workout-set-label">Set ${currentSet + 1} of ${ex.sets}</div>
+      <div class="workout-input-row">
+        <div class="workout-input-group">
+          <div class="workout-input-label">Weight (lb)</div>
+          <input class="workout-input" value="${logEntry ? logEntry.weight : ''}" readonly style="color:var(--green);">
+        </div>
+        <div class="workout-input-group">
+          <div class="workout-input-label">Reps</div>
+          <input class="workout-input" value="${logEntry ? logEntry.reps : ''}" readonly style="color:var(--green);">
+        </div>
+      </div>
+      <div class="set-done-badge">✓ Set logged${logEntry && logEntry.rpe ? ' · RPE ' + logEntry.rpe : ''}</div>
+    `;
+  } else {
+    // Pre-fill weight
+    const prevSetLog = sessionLog.filter(l => l.ei === currentExercise).pop();
+    const predWeight = prevSetLog ? prevSetLog.weight : (ex.prediction ? ex.prediction.match(/^(\d+)/)?.[1] || '' : '');
+
+    document.getElementById('workoutSetDisplay').innerHTML = `
+      <div class="workout-set-label" id="workoutSetLabel">Set ${currentSet + 1} of ${ex.sets}</div>
+      <div class="workout-input-row">
+        <div class="workout-input-group">
+          <div class="workout-input-label">Weight (lb)</div>
+          <input class="workout-input${predWeight ? ' prefilled' : ''}" id="workoutWeight" type="text" inputmode="decimal" placeholder="—" value="${predWeight}">
+        </div>
+        <div class="workout-input-group">
+          <div class="workout-input-label">Reps</div>
+          <input class="workout-input" id="workoutReps" type="text" inputmode="numeric" placeholder="—">
+        </div>
+      </div>
+      <div class="swipe-track" id="swipeTrack">
+        <div class="swipe-track-fill" id="swipeFill"></div>
+        <div class="swipe-thumb" id="swipeThumb">✓</div>
+        <div class="swipe-hint" id="swipeHint">Slide to confirm</div>
+      </div>
+    `;
+    initSwipeGesture();
+  }
+
+  // Remove prefilled style on edit
+  document.querySelectorAll('#workoutMode .prefilled').forEach(inp => {
+    inp.addEventListener('input', function() { this.classList.remove('prefilled'); }, { once: true });
+  });
+
+  // Next up preview
+  renderNextPreview();
+  renderWorkoutDots();
+}
+
+function renderWorkoutDots() {
+  const container = document.getElementById('workoutDots');
+  container.innerHTML = EXERCISES.map((ex, i) => {
+    const allDone = exerciseSetsDone[i].every(Boolean);
+    const isCurrent = i === currentExercise;
+    return `<div class="workout-dot${allDone ? ' done' : ''}${isCurrent ? ' current' : ''}"></div>`;
+  }).join('');
+}
+
+function renderNextPreview() {
+  const preview = document.getElementById('workoutNextPreview');
+  // Find next exercise (not current)
+  let nextEi = -1;
+  const allCurrentDone = exerciseSetsDone[currentExercise].filter(Boolean).length === EXERCISES[currentExercise].sets - (exerciseSetsDone[currentExercise][currentSet] ? 0 : 1);
+
+  // If this is the last set of current exercise and we're about to confirm it, show next exercise
+  for (let i = currentExercise + 1; i < EXERCISES.length; i++) {
+    if (!exerciseSetsDone[i].every(Boolean)) { nextEi = i; break; }
+  }
+
+  if (nextEi >= 0) {
+    const next = EXERCISES[nextEi];
+    const predWeight = next.prediction ? next.prediction.match(/^(\d+)/)?.[1] + ' lb' : 'no baseline';
+    preview.style.display = '';
+    document.getElementById('workoutNextName').textContent = next.name;
+    document.getElementById('workoutNextDetail').textContent = `${next.sets} × ${next.reps} · ${predWeight}`;
+  } else {
+    // Show "last exercise" or hide
+    if (exerciseSetsDone[currentExercise].every(Boolean)) {
+      preview.style.display = '';
+      document.getElementById('workoutNextName').textContent = 'Session complete';
+      document.getElementById('workoutNextDetail').textContent = `${completedSets} sets logged`;
+    } else {
+      const setsLeft = EXERCISES[currentExercise].sets - exerciseSetsDone[currentExercise].filter(Boolean).length;
+      preview.style.display = '';
+      document.getElementById('workoutNextName').textContent = `${setsLeft} set${setsLeft > 1 ? 's' : ''} remaining`;
+      document.getElementById('workoutNextDetail').textContent = EXERCISES[currentExercise].name;
+    }
+  }
+}
+
+// ══════════════════════════════
+// SWIPE GESTURE
+// ══════════════════════════════
+
+function initSwipeGesture() {
+  const track = document.getElementById('swipeTrack');
+  if (!track) return;
+
+  const thumb = document.getElementById('swipeThumb');
+  const fill = document.getElementById('swipeFill');
+  const thumbWidth = 52;
+  const padding = 6;
+
+  track.addEventListener('touchstart', (e) => {
+    const rect = track.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    // Only start if touching the thumb area
+    if (touchX < thumb.offsetLeft + thumbWidth + 20) {
+      swipeState = { active: true, startX: e.touches[0].clientX, trackWidth: rect.width };
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  track.addEventListener('touchmove', (e) => {
+    if (!swipeState.active) return;
+    e.preventDefault();
+    const deltaX = e.touches[0].clientX - swipeState.startX;
+    const maxTravel = swipeState.trackWidth - thumbWidth - padding * 2;
+    const pct = Math.max(0, Math.min(1, deltaX / maxTravel));
+
+    thumb.style.left = `${padding + pct * maxTravel}px`;
+    fill.style.width = `${pct * 100}%`;
+  }, { passive: false });
+
+  track.addEventListener('touchend', (e) => {
+    if (!swipeState.active) return;
+    swipeState.active = false;
+
+    const deltaX = e.changedTouches[0].clientX - swipeState.startX;
+    const maxTravel = swipeState.trackWidth - thumbWidth - padding * 2;
+    const pct = deltaX / maxTravel;
+
+    if (pct > 0.7) {
+      // Confirmed!
+      track.classList.add('confirmed');
+      if ('vibrate' in navigator) navigator.vibrate(50);
+      confirmWorkoutSet();
+    } else {
+      // Reset
+      thumb.style.left = `${padding}px`;
+      fill.style.width = '0';
+    }
+  }, { passive: true });
+
+  // Also allow click/tap on track for accessibility / desktop
+  track.addEventListener('click', (e) => {
+    if (track.classList.contains('confirmed')) return;
+    // Only trigger if both fields filled
+    const w = document.getElementById('workoutWeight');
+    const r = document.getElementById('workoutReps');
+    if (w && r && w.value && r.value) {
+      track.classList.add('confirmed');
+      if ('vibrate' in navigator) navigator.vibrate(50);
+      confirmWorkoutSet();
+    }
+  });
+}
+
+function confirmWorkoutSet() {
+  const weightInput = document.getElementById('workoutWeight');
+  const repsInput = document.getElementById('workoutReps');
+
+  if (!weightInput || !repsInput || !weightInput.value || !repsInput.value) return;
+
+  const weight = weightInput.value;
+  const reps = repsInput.value;
+
+  // Log the set
+  exerciseSetsDone[currentExercise][currentSet] = true;
+  sessionLog.push({ ei: currentExercise, si: currentSet, weight, reps, rpe: null });
+  completedSets++;
+  if (!sessionStartTime) sessionStartTime = Date.now();
+  updateProgress();
+
+  // Haptic
+  if ('vibrate' in navigator) navigator.vibrate(50);
+
+  // Show RPE picker
+  setTimeout(() => showWorkoutRpePicker(), 300);
+}
+
+function showWorkoutRpePicker() {
+  const setDisplay = document.getElementById('workoutSetDisplay');
+  const ex = EXERCISES[currentExercise];
+  const logEntry = sessionLog[sessionLog.length - 1];
+
+  setDisplay.innerHTML = `
+    <div class="workout-set-label">Set ${currentSet + 1} of ${ex.sets}</div>
+    <div class="workout-input-row">
+      <div class="workout-input-group">
+        <div class="workout-input-label">Weight (lb)</div>
+        <input class="workout-input" value="${logEntry.weight}" readonly style="color:var(--green);">
+      </div>
+      <div class="workout-input-group">
+        <div class="workout-input-label">Reps</div>
+        <input class="workout-input" value="${logEntry.reps}" readonly style="color:var(--green);">
+      </div>
+    </div>
+    <div class="set-done-badge">✓ Set logged</div>
+    <div class="workout-rpe" id="workoutRpeRow">
+      <span class="rpe-label">RPE</span>
+      <div class="rpe-pills">
+        ${[6, 7, 8, 9, 10].map(v => `<button class="rpe-pill" data-rpe="${v}" onclick="selectWorkoutRpe(${v}, this)">${v}</button>`).join('')}
+      </div>
+    </div>
+    <div class="workout-rpe-skip" onclick="skipWorkoutRpe()">Skip RPE</div>
+  `;
+
+  pendingRpe = { ei: currentExercise, si: currentSet, logIndex: sessionLog.length - 1 };
+}
+
+function selectWorkoutRpe(rpe, pill) {
+  // Visual
+  pill.closest('.rpe-pills').querySelectorAll('.rpe-pill').forEach(p => p.classList.remove('selected'));
+  pill.classList.add('selected');
+
+  // Store
+  if (pendingRpe && pendingRpe.logIndex !== undefined) {
+    sessionLog[pendingRpe.logIndex].rpe = rpe;
+  }
+
+  // Tess reaction
+  const inRange = rpe >= TARGET.rpe[0] && rpe <= TARGET.rpe[1];
+  const tooHard = rpe > TARGET.rpe[1];
+  const tooEasy = rpe < TARGET.rpe[0];
+  const ex = EXERCISES[currentExercise];
+  const setNum = currentSet + 1;
+  const setsLeft = ex.sets - setNum;
+
+  let response;
+  if (tooHard && rpe >= 10) {
+    response = `RPE 10 on set ${setNum}. That's failure. Drop 10% next set.${setsLeft > 0 ? ` ${setsLeft} sets left -- quality reps, not grinding.` : ''}`;
+  } else if (tooHard) {
+    response = `RPE ${rpe}. Hotter than target.${setsLeft > 0 ? ` Drop 5 lbs for the remaining ${setsLeft} set${setsLeft > 1 ? 's' : ''}.` : ' Note for next session.'}`;
+  } else if (tooEasy) {
+    response = `RPE ${rpe}. Room to add.${setsLeft > 0 ? ` Try +5 lbs next set.` : ' Bump the weight next session.'}`;
+  } else {
+    const phrases = [
+      `RPE ${rpe}. Dialed in.${setsLeft > 0 ? ` ${setsLeft} to go at this weight.` : ''}`,
+      `RPE ${rpe}. That's the zone for ${TARGET.label}.`,
+      `RPE ${rpe}. Perfect. Controlled, productive, sustainable.`
+    ];
+    response = phrases[Math.floor(Math.random() * phrases.length)];
+  }
+
+  addWorkoutTessMessage(response);
+  pendingRpe = null;
+
+  // Advance after brief pause
+  setTimeout(() => advanceWorkoutSet(), 800);
+}
+
+function skipWorkoutRpe() {
+  pendingRpe = null;
+  advanceWorkoutSet();
+}
+
+function advanceWorkoutSet() {
+  const ex = EXERCISES[currentExercise];
+  const allDone = exerciseSetsDone[currentExercise].every(Boolean);
+
+  if (allDone) {
+    // Exercise complete -- check if there's a next exercise
+    let nextEi = -1;
+    for (let i = currentExercise + 1; i < EXERCISES.length; i++) {
+      if (!exerciseSetsDone[i].every(Boolean)) { nextEi = i; break; }
+    }
+
+    if (nextEi >= 0) {
+      // Transition message
+      const next = EXERCISES[nextEi];
+      const isNewSection = EXERCISES[currentExercise].section !== next.section;
+      if (isNewSection) {
+        addWorkoutTessMessage(`Switching gears. ${next.section === 'push' ? 'Push B finish -- shoulders and triceps.' : ''} Next: ${next.name}. ${next.cues[0]}`);
+      }
+
+      currentExercise = nextEi;
+      currentSet = exerciseSetsDone[nextEi].indexOf(false);
+      renderWorkoutExercise();
+    } else {
+      // Session complete!
+      sessionComplete();
+    }
+  } else {
+    // Start rest timer, then advance to next set
+    startWorkoutTimer(ex.rest, ex.name);
+  }
+}
+
+function sessionComplete() {
+  addWorkoutTessMessage("Session complete. Good work today. Copy your log and let's get out of here.");
+  setTimeout(() => exitWorkoutMode(), 1500);
+}
+
+// ══════════════════════════════
+// WORKOUT REST TIMER
+// ══════════════════════════════
+
+function startWorkoutTimer(seconds, exerciseName) {
   clearInterval(timerInterval);
   timerSeconds = seconds;
   const totalSeconds = seconds;
-  const strip = document.getElementById('timerStrip');
-  const countdown = document.getElementById('timerCountdown');
-  const cue = document.getElementById('timerCue');
+  workoutTimerActive = true;
 
-  strip.classList.add('active');
-  countdown.textContent = formatTime(timerSeconds);
-  countdown.style.color = '';
-  cue.textContent = pickCue(REST_CUES.start);
+  // Keep exercise content visible -- show compact timer bar
+  const bar = document.getElementById('timerBar');
+  const barTime = document.getElementById('timerBarTime');
+  const barCue = document.getElementById('timerBarCue');
+
+  bar.className = 'timer-bar active';
+  barTime.textContent = formatTime(timerSeconds);
+  barCue.textContent = pickCue(REST_CUES.start);
 
   let halfwayCued = false;
   let soonCued = false;
 
   timerInterval = setInterval(() => {
     timerSeconds--;
-    countdown.textContent = formatTime(timerSeconds);
+    barTime.textContent = formatTime(timerSeconds);
 
-    // Halfway cue
     if (!halfwayCued && timerSeconds <= Math.floor(totalSeconds / 2) && timerSeconds > 10) {
-      cue.textContent = pickCue(REST_CUES.halfway);
+      barCue.textContent = pickCue(REST_CUES.halfway);
       halfwayCued = true;
     }
 
-    // 10-second warning
     if (!soonCued && timerSeconds <= 10 && timerSeconds > 0) {
-      cue.textContent = pickCue(REST_CUES.soon);
-      countdown.style.color = 'var(--tess)';
+      barCue.textContent = pickCue(REST_CUES.soon);
+      bar.className = 'timer-bar active warning';
       soonCued = true;
     }
 
     if (timerSeconds <= 0) {
       clearInterval(timerInterval);
-      countdown.textContent = "GO";
-      countdown.style.color = 'var(--green)';
-      cue.textContent = pickCue(REST_CUES.go);
+      barTime.textContent = "GO";
+      bar.className = 'timer-bar active go';
+      barCue.textContent = pickCue(REST_CUES.go);
       if ('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+
       setTimeout(() => {
-        strip.classList.remove('active');
-        countdown.style.color = '';
-      }, 4000);
+        workoutTimerActive = false;
+        bar.className = 'timer-bar';
+        // Advance to next set
+        const nextSetIndex = exerciseSetsDone[currentExercise].indexOf(false);
+        if (nextSetIndex >= 0) {
+          currentSet = nextSetIndex;
+        }
+        renderWorkoutExercise();
+      }, 2000);
     }
   }, 1000);
 }
 
-function resetTimer() {
+function skipWorkoutTimer() {
   clearInterval(timerInterval);
-  document.getElementById('timerStrip').classList.remove('active');
+  workoutTimerActive = false;
+  document.getElementById('timerBar').className = 'timer-bar';
+  const nextSetIndex = exerciseSetsDone[currentExercise].indexOf(false);
+  if (nextSetIndex >= 0) {
+    currentSet = nextSetIndex;
+  }
+  renderWorkoutExercise();
 }
 
 function formatTime(s) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 }
 
-// ── Chat ──
-function openChat() {
-  const panel = document.getElementById('chatPanel');
-  if (!chatOpen) {
-    panel.classList.add('open');
-    chatOpen = true;
-    panel.scrollTop = panel.scrollHeight;
-  }
+// ══════════════════════════════
+// CHAT (Workout Mode)
+// ══════════════════════════════
+
+let tessToastTimer = null;
+
+function showTessToast(text) {
+  const toast = document.getElementById('tessToast');
+  const toastText = document.getElementById('tessToastText');
+  toastText.textContent = text;
+  clearTimeout(tessToastTimer);
+  toast.classList.add('visible');
+  tessToastTimer = setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 3000);
 }
 
-function addUserMessage(text) {
-  openChat();
-  const messages = document.getElementById('chatMessages');
-  const msg = document.createElement('div');
-  msg.className = 'chat-msg user';
-  msg.textContent = text;
-  messages.appendChild(msg);
-  scrollChat();
-}
+function addWorkoutTessMessage(text) {
+  // Show as quiet toast instead of opening chat panel
+  showTessToast(text);
 
-function addTessMessage(text) {
-  openChat();
-  const messages = document.getElementById('chatMessages');
+  // Also append to chat panel history so it is there if user opens it
+  const messages = document.getElementById('workoutChatMessages');
   const msg = document.createElement('div');
   msg.className = 'chat-msg tess';
   msg.innerHTML = `<div class="tess-name">Tess</div>${text}`;
   messages.appendChild(msg);
-  scrollChat();
 }
 
-function addSystemMessage(text) {
-  openChat();
-  const messages = document.getElementById('chatMessages');
+function addWorkoutUserMessage(text) {
+  const panel = document.getElementById('workoutChatPanel');
+  const messages = document.getElementById('workoutChatMessages');
+  if (!panel.classList.contains('open')) {
+    panel.classList.add('open');
+  }
   const msg = document.createElement('div');
-  msg.className = 'chat-msg system';
+  msg.className = 'chat-msg user';
   msg.textContent = text;
   messages.appendChild(msg);
-  scrollChat();
-}
-
-function scrollChat() {
-  const panel = document.getElementById('chatPanel');
   requestAnimationFrame(() => { panel.scrollTop = panel.scrollHeight; });
 }
 
-function sendMessage() {
-  const input = document.getElementById('promptInput');
+function sendWorkoutMessage() {
+  const input = document.getElementById('workoutPromptInput');
   const text = input.value.trim();
   if (!text) return;
 
-  addUserMessage(text);
-  input.value = '';
-  document.getElementById('promptSend').classList.remove('ready');
+  // User explicitly chatting -- open the panel
+  const panel = document.getElementById('workoutChatPanel');
+  if (!panel.classList.contains('open')) {
+    panel.classList.add('open');
+  }
 
-  // Slight delay for natural feel
+  addWorkoutUserMessage(text);
+  input.value = '';
+  document.getElementById('workoutPromptSend').classList.remove('ready');
+
   setTimeout(() => {
     const response = TESS.respond(text);
-    addTessMessage(response);
+    // For user-initiated chat, add to panel directly (not toast)
+    const messages = document.getElementById('workoutChatMessages');
+    const msg = document.createElement('div');
+    msg.className = 'chat-msg tess';
+    msg.innerHTML = `<div class="tess-name">Tess</div>${response}`;
+    messages.appendChild(msg);
+    requestAnimationFrame(() => { panel.scrollTop = panel.scrollHeight; });
   }, 300 + Math.random() * 400);
 }
 
-// ── Input handlers ──
-const promptInput = document.getElementById('promptInput');
-const promptSend = document.getElementById('promptSend');
+// ══════════════════════════════
+// CHAT (Review Mode)
+// ══════════════════════════════
 
-promptInput.addEventListener('input', () => {
-  promptSend.classList.toggle('ready', promptInput.value.trim().length > 0);
-});
+function addReviewTessMessage(text) {
+  showTessToast(text);
+}
 
-promptInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendMessage();
+// ══════════════════════════════
+// PROGRESS & SUMMARY
+// ══════════════════════════════
+
+function updateProgress() {
+  const pct = Math.round((completedSets / TOTAL_SETS) * 100);
+  document.getElementById('progressText').textContent = `${completedSets} / ${TOTAL_SETS}`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+function updateSessionSummary() {
+  if (completedSets === 0) return;
+  document.getElementById('sessionSummary').style.display = 'flex';
+
+  // Volume
+  const totalVolume = sessionLog.reduce((sum, l) => {
+    const w = parseFloat(l.weight) || 0;
+    const r = parseInt(l.reps) || 0;
+    return sum + (w * r);
+  }, 0);
+  document.getElementById('summaryVolume').textContent = totalVolume.toLocaleString();
+
+  // Duration
+  if (sessionStartTime) {
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    document.getElementById('summaryDuration').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
   }
-});
 
-// Remove predicted styling on edit
-document.addEventListener('input', (e) => {
-  if (e.target.classList.contains('predicted')) {
-    e.target.classList.remove('predicted');
-  }
-});
+  // Sets
+  document.getElementById('summarySets').textContent = completedSets;
 
-// Enter on reps field logs the set
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && e.target.dataset.field === 'reps') {
-    e.preventDefault();
-    const ei = parseInt(e.target.dataset.ex);
-    const si = parseInt(e.target.dataset.set);
-    const check = document.querySelector(`.set-check[data-ex="${ei}"][data-set="${si}"]`);
-    if (check && !check.classList.contains('done')) check.click();
-  }
-});
+  // PRs (placeholder -- would compare to history)
+  document.getElementById('summaryPRs').textContent = '—';
+}
 
-// ── Copy Log ──
+// ══════════════════════════════
+// COPY LOG
+// ══════════════════════════════
+
 function copyLog() {
   function buildTable(exercises, indices) {
     let t = `| # | Exercise | Set 1 | Set 2 | Set 3 | Set 4 |\n`;
@@ -979,12 +1699,10 @@ function copyLog() {
       const sets = [];
       for (let si = 0; si < 4; si++) {
         if (si < ex.sets) {
-          const w = document.querySelector(`[data-field="weight"][data-ex="${ei}"][data-set="${si}"]`);
-          const r = document.querySelector(`[data-field="reps"][data-ex="${ei}"][data-set="${si}"]`);
           const logEntry = sessionLog.find(l => l.ei === ei && l.si === si);
-          if (w && r && w.value && r.value) {
-            let cell = `${w.value} lb x ${r.value}`;
-            if (logEntry && logEntry.rpe) cell += ` (RPE ${logEntry.rpe})`;
+          if (logEntry) {
+            let cell = `${logEntry.weight} lb x ${logEntry.reps}`;
+            if (logEntry.rpe) cell += ` (RPE ${logEntry.rpe})`;
             sets.push(cell);
           } else sets.push('--');
         } else sets.push('--');
@@ -994,22 +1712,17 @@ function copyLog() {
     return t;
   }
 
-  const warmupExercises = [], warmupIndices = [];
-  const legsExercises = [], legsIndices = [];
-  const bonusExercises = [], bonusIndices = [];
+  const pullExercises = [], pullIndices = [];
+  const pushExercises = [], pushIndices = [];
   EXERCISES.forEach((ex, ei) => {
-    if (ex.section === 'warmup') { warmupExercises.push(ex); warmupIndices.push(ei); }
-    else if (ex.section === 'legs') { legsExercises.push(ex); legsIndices.push(ei); }
-    else { bonusExercises.push(ex); bonusIndices.push(ei); }
+    if (ex.section === 'pull') { pullExercises.push(ex); pullIndices.push(ei); }
+    else { pushExercises.push(ex); pushIndices.push(ei); }
   });
 
-  let log = `## 2026-03-21 | Week 2, Sat: Legs B: Hip Hinge / Posterior Chain\n\n`;
-  log += `### Warm-Up\n\n`;
-  log += buildTable(warmupExercises, warmupIndices);
-  log += `\n### Legs B\n\n`;
-  log += buildTable(legsExercises, legsIndices);
-  log += `\n### Bonus Arms\n\n`;
-  log += buildTable(bonusExercises, bonusIndices);
+  let log = `## 2026-03-20 | Week 1, Fri: Pull B: Vertical Emphasis\n\n`;
+  log += buildTable(pullExercises, pullIndices);
+  log += `\n### Push B Finish (Shoulders + Triceps from 3/19)\n\n`;
+  log += buildTable(pushExercises, pushIndices);
 
   navigator.clipboard.writeText(log).then(() => {
     const toast = document.getElementById('toast');
@@ -1018,58 +1731,74 @@ function copyLog() {
   });
 }
 
-// ── Dock Toggle ──
-let dockMinimized = false;
-const dock = document.getElementById('bottomDock');
-const dockHandle = document.getElementById('dockHandle');
+// ══════════════════════════════
+// INPUT HANDLERS
+// ══════════════════════════════
 
-function toggleDock() {
-  dockMinimized = !dockMinimized;
-  dock.classList.toggle('minimized', dockMinimized);
-  // Adjust body padding
-  document.body.style.paddingBottom = dockMinimized ? '60px' : '160px';
-}
+// Workout mode prompt
+const workoutPromptInput = document.getElementById('workoutPromptInput');
+const workoutPromptSend = document.getElementById('workoutPromptSend');
 
-dockHandle.addEventListener('click', toggleDock);
+workoutPromptInput.addEventListener('input', () => {
+  workoutPromptSend.classList.toggle('ready', workoutPromptInput.value.trim().length > 0);
+});
 
-// Swipe gesture on dock
-let touchStartY = 0;
-let touchStartTime = 0;
-dock.addEventListener('touchstart', (e) => {
-  touchStartY = e.touches[0].clientY;
-  touchStartTime = Date.now();
-}, { passive: true });
-
-dock.addEventListener('touchend', (e) => {
-  const deltaY = e.changedTouches[0].clientY - touchStartY;
-  const elapsed = Date.now() - touchStartTime;
-  // Quick swipe (< 300ms) with enough distance (> 30px)
-  if (elapsed < 300 && Math.abs(deltaY) > 30) {
-    if (deltaY > 0 && !dockMinimized) toggleDock(); // swipe down = minimize
-    if (deltaY < 0 && dockMinimized) toggleDock(); // swipe up = expand
+workoutPromptInput.addEventListener('focus', () => {
+  const panel = document.getElementById('workoutChatPanel');
+  if (!panel.classList.contains('open')) {
+    panel.classList.add('open');
   }
-}, { passive: true });
+});
 
-// Auto-expand dock when timer starts or Tess sends a message
-const origStartTimer = startTimer;
-startTimer = function(seconds, exerciseName) {
-  if (dockMinimized) toggleDock();
-  origStartTimer(seconds, exerciseName);
-};
+workoutPromptInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendWorkoutMessage();
+  }
+});
 
-const origAddTessMessage = addTessMessage;
-addTessMessage = function(text) {
-  if (dockMinimized) toggleDock();
-  origAddTessMessage(text);
-};
+// Remove predicted styling on edit (review mode)
+document.addEventListener('input', (e) => {
+  if (e.target.classList.contains('predicted')) {
+    e.target.classList.remove('predicted');
+  }
+  if (e.target.classList.contains('prefilled')) {
+    e.target.classList.remove('prefilled');
+  }
+});
 
-// ── Init ──
-renderExercises();
+// Enter on reps field in review mode logs the set
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.target.dataset.field === 'reps') {
+    e.preventDefault();
+    const ei = parseInt(e.target.dataset.ex);
+    const si = parseInt(e.target.dataset.set);
+    const check = document.querySelector(`.review-check[data-ex="${ei}"][data-set="${si}"]`);
+    if (check && !check.classList.contains('done')) check.click();
+  }
+});
+
+// Duration timer update
+setInterval(() => {
+  if (sessionStartTime && completedSets > 0) {
+    const elapsed = Math.floor((Date.now() - sessionStartTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    document.getElementById('summaryDuration').textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+  }
+}, 1000);
+
+// ══════════════════════════════
+// INIT
+// ══════════════════════════════
+
+renderReviewExercises();
 updateProgress();
+scrollToActiveCard();
 
-// Welcome message after a beat
+// Welcome message in review mode
 setTimeout(() => {
-  addTessMessage(TESS.greetings[Math.floor(Math.random() * TESS.greetings.length)]);
+  addReviewTessMessage(TESS.greetings[Math.floor(Math.random() * TESS.greetings.length)]);
 }, 800);
 </script>
 </body>
