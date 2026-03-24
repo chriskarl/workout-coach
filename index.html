@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Hone — Pull B</title>
+<title>Hone — Push A</title>
 <style>
   :root {
     --bg: #121212;
@@ -596,8 +596,8 @@
      ═══════════════════════════════ -->
 <div id="reviewMode">
   <div class="review-header">
-    <h1 id="reviewTitle">Pull B: Vertical Emphasis</h1>
-    <div class="subtitle" id="reviewSubtitle">Friday, March 20 — Week 1</div>
+    <h1 id="reviewTitle">Push A: Heavy Pressing Focus</h1>
+    <div class="subtitle" id="reviewSubtitle">Monday, March 23 — Week 2</div>
     <div class="phase-badge" id="reviewBadge">Accumulation: RPE 7-8, 10-15 reps</div>
   </div>
 
@@ -714,60 +714,60 @@
 // EXERCISE DATA
 // ══════════════════════════════
 
-const PULL_B = [
-  { name: "Wide-Grip Lat Pulldown", sets: 4, reps: "10-12", rest: 90,
-    note: "Lead with the vertical pull. Full stretch at top, drive elbows down.",
-    prediction: "120 lb (from Pull A)", section: "pull",
-    cues: ["Think about pulling your elbows into your back pockets.", "Lean back just slightly -- not a full row.", "Full stretch at the top. Let the lats lengthen before you pull again.", "Drive elbows down and back. Hands are hooks."] },
-  { name: "Single-Arm Cable Row", sets: 3, reps: "12-15/side", rest: 60,
-    note: "Rotate slightly at peak for full lat engagement. Hip-height cable.",
-    prediction: "35 lb (est. from cable row)", section: "pull",
-    cues: ["Small rotation at peak contraction -- let the lat fully shorten.", "Hip-height cable. Pull to your hip, not your chest.", "Control the eccentric. Feel the stretch across your back."] },
-  { name: "Chest-Supported DB Row", sets: 3, reps: "10-12", rest: 75,
-    note: "Lower volume than Pull A. Focus on squeeze and stretch. Sciatica-friendly.",
-    prediction: "140 lb (from Pull A)", section: "pull",
-    cues: ["Full stretch at the bottom -- let the DBs hang.", "Drive elbows back, squeeze shoulder blades together at top.", "Chest stays on the pad. Zero momentum."] },
-  { name: "Face Pull (rope, high pulley)", sets: 4, reps: "15-20", rest: 45,
-    note: "External rotation throughout. Non-negotiable for shoulder longevity.",
-    prediction: "25 lb (est.)", section: "pull",
-    cues: ["External rotation the whole time -- thumbs back, pinkies forward.", "This is shoulder insurance. Every rep counts.", "Pull to your face, not your chest. Elbows high.", "Light weight, perfect form. This is not a strength exercise."] },
-  { name: "Incline DB Curl (45-degree)", sets: 3, reps: "10-12", rest: 60,
-    note: "Lengthened bicep position. Full hang at bottom, zero momentum. Go lighter than expected.",
-    prediction: "20 lb (est. start light)", section: "pull",
-    cues: ["Let your arms hang completely at the bottom. Feel that stretch.", "Zero momentum. If you're swinging, drop the weight.", "The stretch at the bottom IS the stimulus. Don't cheat it."] },
-  { name: "EZ Bar Curl", sets: 3, reps: "10-12", rest: 60,
-    note: "Heavier curl variation. Strict form, no swing.",
-    prediction: "55 lb (est.)", section: "pull",
-    cues: ["Elbows pinned to your sides. Only forearms move.", "Squeeze at the top for a full second.", "Strict form. If the weight is too heavy to control, drop it."] }
-];
-
-const PUSH_B_FINISH = [
-  { name: "Seated DB Overhead Press (neutral grip)", sets: 3, reps: "10-12", rest: 90,
-    note: "Shoulder-friendly pressing. Controlled eccentric. Picking up from yesterday.",
-    prediction: "60 lb (from 3/13)", section: "push",
-    cues: ["Neutral grip protects your shoulders. Keep those palms facing each other.", "Controlled eccentric -- 2 seconds down.", "Full lockout at the top. Press through the ceiling."] },
-  { name: "Behind-Body Cable Lateral Raise", sets: 3, reps: "15-20", rest: 45,
-    note: "Humiston technique. Cable runs behind body, isolates medial delt. No swing.",
-    prediction: "10 lb (est. start light)", section: "push",
-    cues: ["Cable behind your body. Slight lean forward.", "Raise to shoulder height -- no higher. Control it.", "No swinging. If you can't control it, drop the weight."] },
+const PUSH_A = [
+  { name: "Cable Crossover / Low-to-High Fly", sets: 3, reps: "12-15", rest: 60,
+    note: "Pre-fatigue chest. Start every push session here. Zero shoulder joint stress.",
+    prediction: "25", section: "push",
+    cues: ["Squeeze at the top -- feel the chest contract.", "Smooth arc, no jerking. Cable does the work.", "Light weight, perfect contraction. This is the warm-up that counts."] },
+  { name: "Neutral-Grip Incline DB Press", sets: 4, reps: "10-15", rest: 90,
+    note: "Primary pressing movement. Elbows track neutral. Drive DBs together at top. Stay at 70 -- push for 12 all sets before adding weight.",
+    prediction: "70", section: "push",
+    cues: ["Neutral grip. Palms face each other the whole time.", "Drive the DBs together at the top -- squeeze the chest.", "Controlled eccentric. 2 seconds down.", "Full ROM. Touch the outer chest at the bottom."] },
+  { name: "Machine Chest Press", sets: 3, reps: "10-12", rest: 60,
+    note: "Constant tension. Pause 1 sec at peak contraction. Stay at 140 -- earn 12 reps before adding weight.",
+    prediction: "140", section: "push",
+    cues: ["Pause at peak contraction for 1 full second.", "Constant tension -- don't lock out completely.", "Feel the chest doing the work, not the shoulders."] },
+  { name: "Landmine Press (kneeling, single-arm)", sets: 3, reps: "10-12/side", rest: 75,
+    note: "Shoulder-friendly arc eliminates impingement. Baseline session -- find your working weight.",
+    prediction: "25", section: "push",
+    cues: ["Kneeling position. Core tight, glutes squeezed.", "Press in the arc the barbell naturally wants to travel.", "Shoulder-friendly -- if anything hurts, stop and adjust."] },
+  { name: "Behind-Body Cable Lateral Raise", sets: 4, reps: "15-20", rest: 45,
+    note: "Humiston signature. Cable runs behind body, isolates medial delt. Do NOT swing.",
+    prediction: "10", section: "push",
+    cues: ["Cable behind your body. Slight lean forward.", "Raise to shoulder height -- no higher. Control it.", "No swinging. If you can't control it, drop the weight.", "This is about the medial delt. Feel it there or go lighter."] },
   { name: "Cable Overhead Tricep Extension (rope)", sets: 3, reps: "12-15", rest: 60,
     note: "Lengthened position for long head. Squeeze at full extension.",
-    prediction: "35 lb (est.)", section: "push",
+    prediction: "30", section: "push",
     cues: ["Elbows stay pointed at the ceiling.", "Full extension. Squeeze the tricep at the bottom.", "The stretch at the top is where the long head grows."] },
-  { name: "Dip Machine or Close-Grip Pushdown", sets: 3, reps: "10-12", rest: 60,
-    note: "Second tricep movement. Different stimulus from overhead extension.",
-    prediction: "80 lb (est.)", section: "push",
-    cues: ["Full lockout at the bottom of each rep.", "Elbows pinned. This is a tricep exercise, not a chest exercise.", "Control the negative. Time under tension matters here."] }
+  { name: "Cable Tricep Pushdown (V-bar)", sets: 3, reps: "12-15", rest: 60,
+    note: "Keep elbows pinned. Full extension lockout.",
+    prediction: "40", section: "push",
+    cues: ["Elbows glued to your sides. Only forearms move.", "Full lockout at the bottom. Squeeze.", "Control the negative -- don't let it snap back up."] }
 ];
 
-const EXERCISES = [...PULL_B, ...PUSH_B_FINISH];
+const AB_FINISHER_A = [
+  { name: "Cable Crunch (kneeling, rope)", sets: 3, reps: "15-20", rest: 60,
+    note: "Sternum to hips, not head to floor. Week 2: learn the movement, feel the muscle.",
+    prediction: "40", section: "abs",
+    cues: ["Crunch sternum toward hips -- not head toward floor.", "Hold the contraction for 1 second.", "Light weight. Feel the abs, not the hip flexors."] },
+  { name: "Ab Wheel Rollout", sets: 3, reps: "8-12", rest: 75,
+    note: "Maintain posterior pelvic tilt. Stop at 45-degree if lumbar flares.",
+    prediction: "0", section: "abs",
+    cues: ["Posterior pelvic tilt FIRST. Tuck your pelvis.", "Stop at 45 degrees if your lower back starts to arch.", "Slow and controlled. This is not a speed exercise."] },
+  { name: "Pallof Press (cable, hip height)", sets: 3, reps: "12/side", rest: 45,
+    note: "Anti-rotation. Hold extended position 2 sec each rep.",
+    prediction: "15", section: "abs",
+    cues: ["Press out and HOLD for 2 seconds. Fight the rotation.", "Hips completely still. Only arms move.", "This builds the deep core. Trust the process."] }
+];
+
+const EXERCISES = [...PUSH_A, ...AB_FINISHER_A];
 const TOTAL_SETS = EXERCISES.reduce((s, e) => s + e.sets, 0);
 
 // ══════════════════════════════
 // PERIODIZATION
 // ══════════════════════════════
 
-const CURRENT_WEEK = 1;
+const CURRENT_WEEK = 2;
 const PHASE_TARGETS = {
   1: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
   2: { rpe: [7, 8], rir: [3, 2], label: "Accumulation", desc: "2-3 reps left in the tank" },
@@ -804,7 +804,7 @@ let exerciseSetsDone = EXERCISES.map(ex => Array(ex.sets).fill(false));
 
 const TESS = {
   greetings: [
-    "Pull B day. Vertical emphasis -- lats are the star. You've got the Push B finish tacked on at the end for shoulders and triceps. Let's build.",
+    "Push A day. Heavy pressing focus. Pre-fatigue with cables, then press. Ab finisher at the end. Week 2 -- same weights, push for more reps. Let's build.",
     "Good morning. Big pull session plus the shoulders and tri work from yesterday. I'll be here between sets."
   ],
 
@@ -932,9 +932,9 @@ function renderReviewExercises() {
   EXERCISES.forEach((ex, ei) => {
     if (ex.section !== lastSection) {
       if (ex.section === 'pull') {
-        html += `<div class="section-divider"><span class="label">Pull B</span><span class="desc">Vertical Emphasis</span></div>`;
-      } else if (ex.section === 'push') {
-        html += `<div class="section-divider"><span class="label">Push B Finish</span><span class="desc">Shoulders + Triceps from yesterday</span></div>`;
+        html += `<div class="section-divider"><span class="label">Push A</span><span class="desc">Heavy Pressing Focus</span></div>`;
+      } else if (ex.section === 'abs') {
+        html += `<div class="section-divider"><span class="label">Ab Finisher A</span><span class="desc">Core Circuit</span></div>`;
       }
       lastSection = ex.section;
     }
@@ -1478,7 +1478,7 @@ function advanceWorkoutSet() {
       const next = EXERCISES[nextEi];
       const isNewSection = EXERCISES[currentExercise].section !== next.section;
       if (isNewSection) {
-        addWorkoutTessMessage(`Switching gears. ${next.section === 'push' ? 'Push B finish -- shoulders and triceps.' : ''} Next: ${next.name}. ${next.cues[0]}`);
+        addWorkoutTessMessage(`Switching gears. ${next.section === 'abs' ? 'Ab finisher -- core circuit.' : ''} Next: ${next.name}. ${next.cues[0]}`);
       }
 
       currentExercise = nextEi;
@@ -1719,7 +1719,7 @@ function copyLog() {
     else { pushExercises.push(ex); pushIndices.push(ei); }
   });
 
-  let log = `## 2026-03-20 | Week 1, Fri: Pull B: Vertical Emphasis\n\n`;
+  let log = `## 2026-03-23 | Week 2, Mon: Push A: Heavy Pressing Focus + Ab Finisher\n\n`;
   log += buildTable(pullExercises, pullIndices);
   log += `\n### Push B Finish (Shoulders + Triceps from 3/19)\n\n`;
   log += buildTable(pushExercises, pushIndices);
